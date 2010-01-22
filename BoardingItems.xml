@@ -11,7 +11,7 @@
 <TranscendenceExtension UNID="&BP_Items;" version="1.0">
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;				Troop Items
+;;;					Troop Items
 ;;;	The gears and cogs that battle is made of!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     <ItemType UNID="&bp_itPlasmidGunner;"

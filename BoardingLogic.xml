@@ -5,17 +5,15 @@
 ]>
 
 <TranscendenceExtension UNID="&BP_Logic;" version="1.0">
-
+<!---
 ;; currently this is just a bin of random thoughts and ideas
 ;; it will eventuall contain all the core mechanics and functions
 ;; for the mod in easy-to-manage helper functions.
 
 
-<!--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-							TACTICS
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;							TACTICS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 The tactical choices will affect the troops in various ways, ranging from
 	increasing their attack power or defense to causing damage to the 
@@ -88,13 +86,11 @@ Choosing a tactic that is appropriate for the troops you are using is
 		Selectively destroy the command structure
 		success determined by stealth, hacker, psionics
 		Instant victory
---->
 
-<!--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-							COMMANDER
-							
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;							COMMANDER
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 The commander represents the player and a golden opportunity to take the
 	game down to the personal level.
@@ -146,13 +142,10 @@ The commander will also posses the SKILL attribute a Combat Level and Combat XP.
 	(leq ComXP 0)
 		0	; level 0
 	)
---->
 
-<!--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-							ENEMIES
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;							ENEMIES
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 It is not in our best interest to create enemy troop items to fight against
 	but rather to simply simulate enemy troops.  The enemy will not use
@@ -189,6 +182,5 @@ This data could be stored on a single virtual item in the following format:
 The base stats (ST, DF, and HP) are based on per/troop item values
 	and would be summed after calculating the number of troops present 
 	from the dice range value.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
+--->
 </TranscendenceExtension>
