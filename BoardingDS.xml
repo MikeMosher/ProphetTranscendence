@@ -1,0 +1,252 @@
+<?xml version="1.0" ?>
+<!DOCTYPE TranscendenceExtension
+[
+	<!ENTITY BP_Screens				"0xD5125000">
+	<!ENTITY itBoardingAdvertiser	"0xD5125001">
+]>
+
+<TranscendenceExtension UNID="&BP_Screens;" version="1.0">
+
+    <ItemType UNID="&itBoardingAdvertiser;"
+        name=       "Boarding Parties Advertiser"
+        frequency=  "notrandom"
+        modifiers=  "ScreenHook; TerminalService; CannotOrder; NotForSale;"
+        >
+        <Image imageID="&rsItems1;" imageX="0" imageY="288" imageWidth="96" imageHeight="96"/>
+        <StaticData>
+            <HookTitle>"Boarding Parties Screen Browser"</HookTitle>
+            <HookSubtitle>"This will be the entry point for the commander screens but for now we can browse them all."</HookSubtitle>
+            <ScreenData>'(bp_ScreenData 'Debug)</ScreenData>
+        </StaticData>
+    </ItemType>
+<Globals>
+	(setq bp_ScreenData (lambda (screen) (block Nil
+		(switch
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;						Debug screen
+;; This screen is used for debugging and should have access to all other screens.
+			(eq screen "Debug")
+				(list
+					'screenName     "We're debugging, so where do you want to go?"
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+					
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;						Initial screen
+;; This screen is the entrance to the battle, warning the player that there is combat 
+			(eq screen "Warning")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       True
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;					
+;;						TACTIC SCREENS
+;; This screen will display the tactics available to the player
+			(eq screen "TacticMain")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenType     "CustomPicker"
+					'hideBack       Nil
+					'hideExit       True
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;						TROOP SCREENS
+;; This screen allows the player to choose the troops that will be sent into combat
+			(eq screen "TroopSelect")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenType     "ItemPickerPlayer"
+					'itemFilter     "* +TroopItem;"
+					'noSave         True
+					'hideBack       Nil
+					'hideExit       True
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; Select the number of troops to be sent in
+			(eq screen "TroopCount")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       True
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;					BATTLE SCREENS
+;; This screen will display the stats and initiates the combat
+			(eq screen "BattleInit")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; This screen will display the battle with as much detail as possible
+			;; possibly even run automatically with optional interrupts to change
+			;; tactics or use special abilities
+			(eq screen "BattleMain")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; Combat successful
+			(eq screen "BattleWin")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; Combat not successful
+			(eq screen "BattleLose")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; Player killed in combat
+			(eq screen "BattlePK")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;					COMMANDER SCREENS
+;; This screen is the entry point to the commander screens
+			(eq screen "CommanderMain")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; This screen displays current skill and attribute levels
+			;; as well as xp and level information
+			(eq screen "CommanderLevel")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; This screen is displayed when the player has achieved a new level
+			(eq screen "CommanderUpgrade")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; This screen browses personal combat equipment
+			(eq screen "CommanderBrowse")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenType     "ItemPickerPlayer"
+					'itemFilter     "* +CommanderItem;"
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+			;; This screen provides the mechanics to equip/unequip personal combat items
+			(eq screen "CommanderEquip")
+				(list
+					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'hideBack       Nil
+					'hideExit       Nil
+					'initFunc	'(block Nil
+						)
+					'actions	(list
+						(list
+							)
+						)
+					)
+					
+			)
+		)))
+</Globals>
+</TranscendenceExtension>

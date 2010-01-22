@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<!DOCTYPE TranscendenceExtension
+[
+	<!ENTITY BP_Items				"0xD5124000">
+	
+	<!ENTITY bp_itPlasmidGunner		"0xD5124001">
+	
+	<!ENTITY bp_itMonoFilamentBlade	"0xD5124101">
+]>
+
+<TranscendenceExtension UNID="&BP_Items;" version="1.0">
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;				Troop Items
+;;;	The gears and cogs that battle is made of!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    <ItemType UNID="&bp_itPlasmidGunner;"
+        name            = "Plasmid Gunner"
+        level           = "1"
+        value           = "350"
+        mass            = "50"
+        frequency       = "uncommon"
+        numberAppearing = "1d3"
+        modifiers       = "TroopUnit; MinorItem;"
+
+        description     = "Plasmid Gunners are the most common simple boarding bot."
+        sortname        = "troop, plasmid gunner,"
+        >
+        <Image imageID="&rsItems1;"
+            imageX  = "192"
+            imageY  = "480"
+            imageW  = "96"
+            imageH  = "96"
+        />
+        <StaticData>
+		
+			<Strength>		3	</Strength>
+			<Defense>		1	</Defense>
+			<Health>		2	</Health>
+			
+			<C3I>			1	</C3I>
+			<Stealth>		-2	</Stealth>
+			<Psionics>		-5	</Psionics>
+			<Hacker>		2	</Hacker>
+			<Healer>		-3	</Healer>
+			<Demolitions>	0	</Demolitions>
+			<Commando>		1	<Commando>
+			<Commander>		-1	</Commander>
+        </StaticData>
+    </ItemType>
+	
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;				Commander Items
+;;;	These items allow more specialization of the character
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    <ItemType UNID="&bp_itMonoFilamentBlade;"
+        name            = "mono-filament blade"
+        level           = "4"
+        value           = "6350"
+        mass            = "5"
+        frequency       = "rare"
+        numberAppearing = "1"
+        modifiers       = "Commander; MajorItem;"
+
+        description     = "This blade is constructed using nano tech to align individual atoms and ensure this blade never dulls."
+        sortname        = "commander, mono-filament blade,"
+        >
+        <Image imageID="&rsItems1;"
+            imageX  = "192"
+            imageY  = "480"
+            imageW  = "96"
+            imageH  = "96"
+        />
+        <StaticData>
+		
+			<Strength>		2	</Strength>
+			<Defense>		0	</Defense>
+			<Health>		0	</Health>
+			
+			<C3I>			0	</C3I>
+			<Stealth>		0	</Stealth>
+			<Psionics>		0	</Psionics>
+			<Hacker>		0	</Hacker>
+			<Healer>		0	</Healer>
+			<Demolitions>	0	</Demolitions>
+			<Commando>		0	<Commando>
+			<Commander>		0	</Commander>
+        </StaticData>
+    </ItemType>
+	
+</TranscendenceExtension>

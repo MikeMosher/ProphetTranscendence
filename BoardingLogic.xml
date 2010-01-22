@@ -1,0 +1,194 @@
+<?xml version="1.0" ?>
+<!DOCTYPE TranscendenceExtension
+[
+	<!ENTITY BP_Logic				"0xD5125100">
+]>
+
+<TranscendenceExtension UNID="&BP_Logic;" version="1.0">
+
+;; currently this is just a bin of random thoughts and ideas
+;; it will eventuall contain all the core mechanics and functions
+;; for the mod in easy-to-manage helper functions.
+
+
+<!--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+							TACTICS
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+The tactical choices will affect the troops in various ways, ranging from
+	increasing their attack power or defense to causing damage to the 
+	potential loot that is currently being fought for.
+the ability to use more advanced tactics will come from fighting more
+	battles, and perhaps even some new items.
+Choosing a tactic that is appropriate for the troops you are using is
+	critical for success.
+
+	Attack
+		Required Skill: 0
+		success determined by chance,
+		no modification of stats
+	Retreat
+		Required Skill: 0
+		Attempt to remove the engaged troops from battle
+		success determined by chance,
+		Reduce attatck power to 0 and attempt to undock
+	Take Cover
+		Required Skill: 5
+		success determined by chance, healer
+		Reduce attack by 25%, raise defense by 50%
+	Flank
+		Required Skill: 10
+		Maintain a superior line of fire
+		Success determined by C3I, stealth
+		Increase attack by 50%, reduce defense by 25%
+	Fighting Withdrawl
+		Required Skill: 12
+		Maintain line of fire while retreating
+		success determined by C3I,
+		reduce attack by 50% and attempt to undock
+	Feint
+		Required Skill: 15
+		High chance of caualties on one side or the other
+		success determined by C3I, Commando,
+		either raise attack by 100% or reduce defense by 50%
+	Attrition
+		Required Skill: 20
+		Maintain cover while slowly retreating
+		success determined by 
+		raise defense by 25% and attempt to undock
+	Rush
+		Required Skill: 25
+		High chance of casualties on one side or the other
+		success determined by chance
+		Increase attack by 100% AND reduce defense by 50%
+	Siege
+		Required Skill: 30
+		Use area attacks and long range weaponry
+		success determined by demolitions, hacker
+		Increase defense by 100%, reduce attack by 50%
+	Skirmish
+		Required Skill: 35
+		Divide and conquer, reduce to one-on-one
+		success determined by commando,
+		Increase attack by 100%, reduce defense by 50%		
+	Ambush
+		Required Skill: 40
+		Surround the enemy troops
+		success determined by hacker, psionics, commando
+		Increase attack by 100%
+	Spray and Pray
+		Required Skill: 45
+		Provide cover fire and tend wounds
+		success determined by healer, 
+		Increase Health back to max
+	Assassination
+		Required Skill: 50
+		Selectively destroy the command structure
+		success determined by stealth, hacker, psionics
+		Instant victory
+--->
+
+<!--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+							COMMANDER
+							
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+The commander represents the player and a golden opportunity to take the
+	game down to the personal level.
+The extent to which the commander is used will vary from player to player.
+I feel it will be important to provide many options for customization and
+	enhancement to really provide an extra element to the gameplay.
+	
+Just like the troops, the commander will have the 3 basic stats:
+	Strength
+	Defense
+	Health
+However, unlike the troops, these stats will begin at a base value and can
+	be increased with personal equipment like firearms, armor etc.
+This will require many new items that will have limited use and a unique
+	method for bringing them into the game may be preferable to the 
+	standard looting.  Perhaps awarding them after battle would be better?
+These stats will also increase according to level (see below)
+	
+The commander will also possess the Advanced abilities and these will be 
+	included in the battle calculations whether the commander is in
+	direct combat or not.
+These abilities will increase by level (see below)
+
+The commander will also posses the SKILL attribute a Combat Level and Combat XP.
+	A successful battle will award 10XP, a failed battle will award 2XP
+	and the levels will be determined as follows:
+	
+(switch
+	(geq ComXP 25000) 	; this represents 2500 succesfull battles
+		10	; level 10
+	(leq ComXP 10000)
+		9	; level 9
+	(leq ComXP 5000)
+		8	; level 8
+	(leq ComXP 2500)
+		7	; level 7
+	(leq ComXP 1000)
+		6	; level 6
+	(leq ComXP 500)
+		5	; level 5
+	(leq ComXP 250)
+		4	; level 4
+	(leq ComXP 100)
+		3	; level 3
+	(leq ComXP 50)
+		2	; level 2
+	(leq ComXP 25) 		; this represents 2 success and 3 failures
+		1	; level 1
+	(leq ComXP 0)
+		0	; level 0
+	)
+--->
+
+<!--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+							ENEMIES
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+It is not in our best interest to create enemy troop items to fight against
+	but rather to simply simulate enemy troops.  The enemy will not use
+	any tactics, but it would be assumed that when a tactic fails (due to 
+	chance or lack of troop ability, commander skill etc.) the enemy was
+	responsible.
+It may be worthwhile to build a list of sovereigns and each sov have a list
+	of target numbers that would be used in the success/failure calculations
+	when the player chooses a tactic.
+This could provide differentiation between the Sovs/factions, so that the 
+	Luminous will be immune to a psionic attack but will be vulnerable to
+	hackers.
+This data could be stored on a single virtual item in the following format:
+	(itmGetStaticData &bp_FactionData; "Luminous") will return:
+		(list
+			;; base stats
+			3	; Strength
+			2	; Defense
+			1	; Health
+			;; adv. ability modifiers (%)
+			100	; C3I
+			150	; Stealth
+			0	; Psionics are useless
+			150	; Hacker
+			200	; Healer
+			100	; Demolitions
+			100	; Commando
+			;; number of enemy troops
+			1d3+2	; number of troops appearing
+			)
+	where a value of 100 means that the player's ability is unmodified,
+	and a value >100 is more effective, <100 is less effective and 0
+	is an immunity.
+The base stats (ST, DF, and HP) are based on per/troop item values
+	and would be summed after calculating the number of troops present 
+	from the dice range value.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+</TranscendenceExtension>
