@@ -22,78 +22,196 @@
 <Globals>
 	(setq bp_ScreenData (lambda (screen) (block Nil
 		(switch
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;						Debug screen
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This screen is used for debugging and should have access to all other screens.
 			(eq screen "Debug")
 				(list
 					'screenName     "We're debugging, so where do you want to go?"
-					'hideBack       Nil
-					'hideExit       Nil
-					'initFunc	'(block Nil
-						)
-					'actions	(list
+					'paneDesc       "Welcome to the boarding parties back door!"
+					'screenType     "CustomPicker"
+					'hideBack       True
+					'customPicker   (list
+						;;;; Screen Browser
 						(list
-							)
+							'title      "Initial screen"
+							'subtitle   "The intended initial screen"
+							'paneDesc   '("\n\nWhen a combat is about to begin, this screen should be displayed." '+)
+							'actions    (list
+								(list
+									'name       '("View the Initial Screen" 'I)
+									'runFunc    '(bp_ScreenData "Warning")
+								))
+						)
+						(list
+							'title      "Tactics screen"
+							'subtitle   "Choose your destiny!"
+							'paneDesc   '("\n\nThe player must decide the best course of action." '+)
+							'actions    (list
+								(list
+									'name       '("View the Tactics Screen" 'T)
+									'runFunc    '(bp_ScreenData "TacticMain")
+								))
+						)
+						(list
+							'title      "Troop select screen"
+							'subtitle   "Send in the bots!"
+							'paneDesc   '("\n\nThe best way to make friends is to kill their enemies." '+)
+							'actions    (list
+								(list
+									'name       '("View the troop Select screen" 'S)
+									'runFunc    '(bp_ScreenData "TroopSelect")
+								))
+						)
+						(list
+							'title      "Battle screen"
+							'subtitle   "In space, no one can hear them scream!"
+							'paneDesc   '("\n\nWatch your bots in action." '+)
+							'actions    (list
+								(list
+									'name       '("View the Battle screen" 'B)
+									'runFunc    '(bp_ScreenData "BattleInit")
+								))
+						)
+						(list
+							'title      "Commander screen"
+							'subtitle   "Finally, some personal screen time!"
+							'paneDesc   '("\n\nTaking the fight to a personal level." '+)
+							'actions    (list
+								(list
+									'name       '("View the Battle screen" 'B)
+									'runFunc    '(bp_ScreenData "CommanderMain")
+								))
+						)
 						)
 					)
 					
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;						Initial screen
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This screen is the entrance to the battle, warning the player that there is combat 
 			(eq screen "Warning")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenName     "WANRING WARNING WARNING"
+					'paneDesc       "Sensors indicate hostiles are still active!"
+					'screenType     "Canvas"
 					'hideBack       True
 					'hideExit       Nil
 					'initFunc	'(block Nil
+						;; We have found enemy resistance so load up some data
+						;; find the player's C3I skill and perhaps some new ship
+						;; device to scan the target station/wreck for more accurate info
+						;; TODO: create these functions and decide what we need to do here
+						;; (bp_InitializeBattle)
+						;; (bp_InitializeEnemy)
 						)
 					'actions	(list
 						(list
-							)
+							'name       '("Begin preparations" 'B)
+							'runFunc    '(bp_ScreenData "TacticMain")
+						)
+						(list
+							'name       '("Perform intensive scan" 'P)
+							'runFunc    '(bp_ScreenData "Scan")			;; TODO: this screen does not yet exist!
+						)
+						(list
+							'name       '("Get suited up" 'G)
+							'runFunc    '(bp_ScreenData "CommanderEquip")	;; TODO: remember that there's a battle happening
+						)
 						)
 					)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;					
 ;;						TACTIC SCREENS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This screen will display the tactics available to the player
 			(eq screen "TacticMain")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenName     "Choose your battle tactic wisely!"
 					'screenType     "CustomPicker"
 					'hideBack       Nil
 					'hideExit       True
-					'initFunc	'(block Nil
-						)
-					'actions	(list
+					'customPicker   (list
+						;;;; Tactic Browser
 						(list
+							'title      "Offensive tactics, basic"
+							'subtitle   "Send in the troops."
+							'paneDesc   '("\n\nThe most basic strategy ever: shoot." '+)
+							'actions	(list
+								(list
+									'name       '("Attack" 'A)
+									'runFunc    '(block Nil
+									;; set the data that we need
+									;; then move onto selecting appropriate troops
+									(bp_ScreenData "TroopMain")
+										)
+									)
+								)
 							)
+						(list
+							'title      "Defensive tactics, basic"
+							'subtitle   "Pull the troops out."
+							'paneDesc   '("\n\nThe second most basic strategy ever: run away." '+)
+							'hideList   '(True)
+							'actions	(list
+								(list
+									'name       '("Retreat" 'R)
+									'runFunc    '(block Nil
+										;; set the data that we need
+										;; then move onto selecting appropriate troops
+										(bp_ScreenData "TroopMain")
+										)
+									)
+								)
+							)
+						(list
+							'title      "Psionic Attack"
+							'subtitle   "Use those egg heads to their full potential."
+							'paneDesc   '("\n\nWhy kill your enemies when you can enslave them?" '+)
+							'hideList   '(and (geq (bp_GetPlayerData "Tactics") 4)
+								(geq (bp_GetPlayerData "Psionics") 1))
+							'actions	(list
+								(list
+									'name       '("Mind Blast" 'M)
+									'runFunc    '(block Nil
+										;; set the data that we need
+										;; then move onto selecting appropriate troops
+										(bp_ScreenData "TroopMain")
+									)
+								)
+								(list
+									'name       '("Convert" 'C)
+									'runFunc    '(block Nil
+										;; set the data that we need
+										;; then move onto selecting appropriate troops
+										(bp_ScreenData "TroopMain")
+										)
+									'hideList   '(geq (bp_GetPlayerData "Psionics") 5)
+									)
+								)
+							)
+							
 						)
 					)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;						TROOP SCREENS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This screen allows the player to choose the troops that will be sent into combat
 			(eq screen "TroopSelect")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenName     "Troop select"
 					'screenType     "ItemPickerPlayer"
 					'itemFilter     "* +TroopItem;"
 					'noSave         True
 					'hideBack       Nil
 					'hideExit       True
-					'initFunc	'(block Nil
-						)
-					'actions	(list
-						(list
-							)
-						)
 					)
 			;; Select the number of troops to be sent in
 			(eq screen "TroopCount")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenName     "Troop select, count"
 					'hideBack       Nil
 					'hideExit       True
 					'initFunc	'(block Nil
@@ -106,6 +224,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;					BATTLE SCREENS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This screen will display the stats and initiates the combat
 			(eq screen "BattleInit")
 				(list
@@ -173,75 +292,99 @@
 							)
 						)
 					)
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;					COMMANDER SCREENS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This screen is the entry point to the commander screens
 			(eq screen "CommanderMain")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenName     "Character Screen"
+					'screenType     "Canvas"
 					'hideBack       Nil
 					'hideExit       Nil
 					'initFunc	'(block Nil
-						)
-					'actions	(list
-						(list
+						(dsf_SetScreenData 'canvasFunc (block Nil
+							(dsf_DrawText ("Commander stats" nil nil 'Large 100 100 '(128 128 128) 'Left))
+							(dsf_DrawText ("Strength: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Defense: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("HP: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Tactics: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Level: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("XP: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Xp needed for next level: " nil 30 'small nil nil '(128 128 128) 'Left))
+							
+							(dsf_DrawText ("Skills" 300 100 'Large 100 100 '(128 128 128) 'Left))
+							(dsf_DrawText ("C3I: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Psionics: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Hacker: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Healer: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Demolition: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Commando: " nil 30 'small nil nil '(128 128 128) 'Left))
+							(dsf_DrawText ("Commander: " nil 30 'small nil nil '(128 128 128) 'Left))
 							)
-						)
-					)
-			;; This screen displays current skill and attribute levels
-			;; as well as xp and level information
-			(eq screen "CommanderLevel")
-				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
-					'hideBack       Nil
-					'hideExit       Nil
-					'initFunc	'(block Nil
-						)
+						(dsf_DisplayCanvas)
+						))
 					'actions	(list
 						(list
+							'name       '("Spend skill points" 'S)
+							'runFunc    '(bp_ScreenData "CommanderUpgrade")
+							'hideFunc	'(gr (bp_GetCommanderPoints) 0)
+							)
+						(list
+							'name       '("View personal inventory" 'V)
+							'runFunc    '(bp_ScreenData "CommanderEquip")
 							)
 						)
 					)
 			;; This screen is displayed when the player has achieved a new level
 			(eq screen "CommanderUpgrade")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenName     "Character upgrade screen"
+					'screenType     "CustomPicker"
 					'hideBack       Nil
-					'hideExit       Nil
+					'hideExit       True
 					'initFunc	'(block Nil
 						)
-					'actions	(list
-						(list
-							)
-						)
-					)
-			;; This screen browses personal combat equipment
-			(eq screen "CommanderBrowse")
-				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
-					'screenType     "ItemPickerPlayer"
-					'itemFilter     "* +CommanderItem;"
-					'hideBack       Nil
-					'hideExit       Nil
-					'initFunc	'(block Nil
-						)
-					'actions	(list
+					'customPicker   (list
+						;;;; Skill upgrade
 						(list
 							)
 						)
 					)
 			;; This screen provides the mechanics to equip/unequip personal combat items
+			;; This screen will be available at the begining of combat and at any time through
+			;; the external interface so we need a way to determine if we go to battle or not
+			;; TODO: wow, so much.
+			;; bp_EquipItem is not yet defined.  It should check the static data stats of the passed
+			;; in item and increment the player's stats appropriately
+			;; 
+			;; the personal equipment needs types (armor, weapon, device etc.) to eliminate possible
+			;; duplicates.
 			(eq screen "CommanderEquip")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
+					'screenName     "Your personal armory"
+					'screenType     "ItemPickerPlayer"
+					'itemFilter     "* +CommanderItem;"
 					'hideBack       Nil
-					'hideExit       Nil
-					'initFunc	'(block Nil
-						)
+					'hideExit       True
 					'actions	(list
 						(list
+							'name       '("Equip this item" 'E)
+							'runFunc    '(block Nil
+								(itmSetGlobalData (scrGetItem gScreen) "Equipped" True)
+								(bp_EquipItem (scrGetItem gScreen))
+								(bp_ScreenData "CommanderEquip")
+								)
+							'hideFunc	'(not (itmGetGlobalData (scrGetItem gScreen) "Equipped"))
+							)
+						(list
+							'name       '("Unequip this item" 'U)
+							'runFunc    '(block Nil
+								(itmSetGlobalData (scrGetItem gScreen) "Equipped" Nil)
+								(bp_UnequipItem (scrGetItem gScreen))
+								(bp_ScreenData "CommanderEquip")
+								)
+							'hideFunc	'(itmGetGlobalData (scrGetItem gScreen) "Equipped")
 							)
 						)
 					)

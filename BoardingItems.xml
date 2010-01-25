@@ -2,10 +2,11 @@
 <!DOCTYPE TranscendenceExtension
 [
 	<!ENTITY BP_Items				"0xD5124000">
+	<!ENTITY bp_FactionCalculator	"0xD5124001">
 	
-	<!ENTITY bp_itPlasmidGunner		"0xD5124001">
+	<!ENTITY bp_itPlasmidGunner		"0xD5124101">
 	
-	<!ENTITY bp_itMonoFilamentBlade	"0xD5124101">
+	<!ENTITY bp_itMonoFilamentBlade	"0xD5124201">
 ]>
 
 <TranscendenceExtension UNID="&BP_Items;" version="1.0">
@@ -88,5 +89,144 @@
 			<Commander>		0	</Commander>
         </StaticData>
     </ItemType>
+	
+	
+	;; This is our master item, containing all the stats for every sovereign
+	<ItemType UNID=	"&bp_FactionCalculator;"
+			name=				"Faction Calculator"
+			virtual=			"true"
+			>
+        <StaticData>
+			;; Perhaps this would be easier using hash functions?
+			;; maybe the new lookup?
+			;; I'm not 100% on how this data should be stored
+			<Anarchists>
+				(list
+					('Strength		1)
+					('Defense		1)
+					('HP			3)
+					('C3I			0)
+					('Stealth		0)
+					('Psionic		0)
+					('Hacker		0)
+					('Healer		0)
+					('Demolition	2)
+					('Commando		0)
+					('Troops		2)
+				)
+			</Anarchists>
+			
+			<Ares>
+			</Ares>
+			
+			<AresHeretic>
+			</AresHeretic>
+			
+			<BlackMarket>
+			</BlackMarket>
+			
+			<Commonwealth>
+			</Commonwealth>
+			
+			<Corporate>
+			</Corporate>
+			
+			<CSCAntarctica>
+			</CSCAntarctica>
+			
+			<Cult>
+			</Cult>
+			
+			<DefectiveAuton>
+			</DefectiveAuton>
+			
+			<DestructiveChaos>
+			</DestructiveChaos>
+			
+			<DestructiveOrder>
+			</DestructiveOrder>
+			
+			<Domina>
+			</Domina>
+			
+			<DwargRaiders>
+			</DwargRaiders>
+			
+			<FerianMiners>
+			</FerianMiners>
+			
+			<FerianMinersAngry>
+			</FerianMinersAngry>
+			
+			<FleetAssassins>
+			</FleetAssassins>
+			
+			<FriendlyAuton>
+			</FriendlyAuton>
+			
+			<FriendlyLuminous>
+			</FriendlyLuminous>
+			
+			<FriendlyZoanthrope>
+			</FriendlyZoanthrope>
+			
+			<GaianTerraformers>
+			</GaianTerraformers>
+			
+			<Gladiator>
+			</Gladiator>
+			
+			<Heliotropes>
+			</Heliotropes>
+			
+			<HimalSeparatists>
+			</HimalSeparatists>
+			
+			<HuariEmpire>
+			</HuariEmpire>
+			
+			<Independent>
+			</Independent>
+			
+			<IndependentTrader>
+			</IndependentTrader>
+			
+			<Iocrym>
+			</Iocrym>
+			
+			<KobolWarlords>
+			</KobolWarlords>
+			
+			<Outlaw>
+			</Outlaw>
+			
+			<Player>
+			</Player>
+			
+			<Pirates>
+			</Pirates>
+			
+			<Ringers>
+			</Ringers>
+			
+			<RogueFleet>
+			</RogueFleet>
+			
+			<SentinelAI>
+			</SentinelAI>
+			
+			<Settlers>
+			</Settlers>
+			
+			<Sung>
+			</Sung>
+			
+			<SungSlaves>
+			</SungSlaves>
+			
+			<UrakWarlords>
+			</UrakWarlords>
+		</StaticData>
+	</ItemType>
 	
 </TranscendenceExtension>

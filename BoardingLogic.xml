@@ -5,12 +5,157 @@
 ]>
 
 <TranscendenceExtension UNID="&BP_Logic;" version="1.0">
+<Globals>
+(block Nil
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;		Debug functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;; We'll start with some debug helpers, I have a feeling we'll need them
+	;; borrowed from alterecco's DSF mod ;P
+
+	;; This variable controls if we are running in debug or not.
+	(setq bp_Debug True)
+	;; this is a convenient way to force all debug calls from
+	;; log to screen
+	(setq bp_DebugToScreen Nil)
+	;; DoDebug will print debug information if dsf_Debug
+	;; is set. It takes a string which will be output, and
+	;; if screen is True, it will be sent to the screen.
+	;; Otherwise it will go into the log
+	(setq bp_DoDebug (lambda (string screen)
+		(if bp_Debug
+			(if (or screen bp_DebugToScreen)
+				(dbgOutput string)
+				(dbgLog string)
+			)
+		)
+	))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;		Manipulating Player Data
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	Player data is kept on the playership because it will change as
+;;; the game progresses.
+
+	;; This function sets everything up and should only be run once
+	(setq bp_InitializePlayerData (lambda Nil
+		(if (not (objGetData gPlayerShip "bpInitialized"))
+			(block Nil
+				(objSetData gPlayerShip "Strength"	1)
+				(objSetData gPlayerShip "Defense"	1)
+				(objSetData gPlayerShip "HP"		1)
+				(objSetData gPlayerShip "C3I"		1)
+				(objSetData gPlayerShip "Stealth"	1)
+				(objSetData gPlayerShip "Psionic"	1)
+				(objSetData gPlayerShip "Hacker"	1)
+				(objSetData gPlayerShip "Healer"	1)
+				(objSetData gPlayerShip "Demolition" 1)
+				(objSetData gPlayerShip "Commando"	1)
+
+				(objSetData gPlayerShip "Tactics" 	1)
+				(objSetData gPlayerShip "bpCommXP" 	0)
+				(objSetData gPlayerShip "bpCommLevel" 1)
+				(objSetData gPlayerShip "bpCommPoints" 5)
+				
+				(objSetData gPlayerShip "bpVictories" 0)
+				(objSetData gPlayerShip "bpFailures" 0)
+				
+				;; mark that we've been run
+				(objSetData gPlayerShip "bpInitialized" True)
+			)
+		)
+	))
+
+	(setq bp_GetPlayerData (lambda (stat)
+		(objGetData gPlayerShip stat)
+	))
+	(setq bp_SetPlayerData (lambda (stat data)
+		(objSetData gPlayerShip stat data)
+	))
+	
+	(setq bp_GetCommanderXP (lambda Nil
+		(objGetData gPlayerShip "bpCommXP")
+	))
+	(setq bp_AddCommanderXP (lambda (reward)
+		(objIncData gPlayerShip "bpCommXP" reward)
+	))
+	
+	(setq bp_GetCommanderPoints (lambda Nil
+		(objGetData gPlayerShip "bpCommPoints")
+	))
+	(setq bp_AddCommanderPoints (lambda (points)
+		(objIncData gPlayerShip "bpCommPoints" points)
+	))
+	
+	(setq bp_GetCommanderLevel (lambda Nil
+		(objGetData gPlayerShip "bpCommLevel")
+	))
+	(setq bp_SetCommanderLevel (lambda (level)
+		(objSetData gPlayerShip "bpCommLevel" level)
+	))
+	
+	(setq bp_ComputeCommanderLevel (lambda Nil
+		(block (xp oldLvl newLvl)
+			(setq xp (bp_GetCommanderXP))
+			(setq oldLvl (bp_GetCommanderLevel))
+			(switch
+				(leq xp 0)
+					(setq newLvl 1)
+				(leq xp 100)
+					(setq newLvl 2)
+				(leq xp 250)
+					(setq newLvl 3)
+				(leq xp 500)
+					(setq newLvl 4)
+				(leq xp 1000)
+					(setq newLvl 5)
+				(leq xp 2500)
+					(setq newLvl 6)
+				(leq xp 5000)
+					(setq newLvl 7)
+				(leq xp 10000)
+					(setq newLvl 8)
+				(leq xp 25000)
+					(setq newLvl 8)
+				(setq newLvl 10)
+			)
+			;; if we've gained enough xp for a new level
+			;; redirect to the commander upgrade screen
+			;; TODO: perhaps we should just make a note
+			;; and let the player go to the screen when they choose?
+			(if (gr newLvl oldLvl)
+				(block Nil
+					(bp_SetCommanderLevel newLvl)
+					(bp_AddCommanderPoints 5)
+					(bp_ScreenData 'CommanderUpgrade)
+				)
+			)
+		)
+	))
+			
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;		Manipulating Enemy Data
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Enemy data is kept in static data because it remains the same 
+;;; throughout the game and is modified dynamically to suit our needs
+
+	(setq bp_GetEnemyData (lambda (sov stat)
+		(block (list data Found)
+			(setq list (itmGetStaticData &bp_FactionCalculator; sov))
+			(setq Found Nil)
+			(enumwhile list (not Found) thisEntry (block Nil
+				(if (eq (item thisEntry 0) stat)
+					(block nil
+						(setq data (item thisEntry 1))
+						(setq Found True)
+					)
+				)
+			))
+		data
+		)
+	))
+)
+</Globals>
 <!---
-;; currently this is just a bin of random thoughts and ideas
-;; it will eventuall contain all the core mechanics and functions
-;; for the mod in easy-to-manage helper functions.
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;							TACTICS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -118,30 +263,6 @@ The commander will also posses the SKILL attribute a Combat Level and Combat XP.
 	A successful battle will award 10XP, a failed battle will award 2XP
 	and the levels will be determined as follows:
 	
-(switch
-	(geq ComXP 25000) 	; this represents 2500 succesfull battles
-		10	; level 10
-	(leq ComXP 10000)
-		9	; level 9
-	(leq ComXP 5000)
-		8	; level 8
-	(leq ComXP 2500)
-		7	; level 7
-	(leq ComXP 1000)
-		6	; level 6
-	(leq ComXP 500)
-		5	; level 5
-	(leq ComXP 250)
-		4	; level 4
-	(leq ComXP 100)
-		3	; level 3
-	(leq ComXP 50)
-		2	; level 2
-	(leq ComXP 25) 		; this represents 2 success and 3 failures
-		1	; level 1
-	(leq ComXP 0)
-		0	; level 0
-	)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;							ENEMIES
