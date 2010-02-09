@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <!DOCTYPE TranscendenceExtension
 [
-	<!ENTITY BP_Items				"0xD5124000">
-	<!ENTITY bp_FactionCalculator	"0xD5124001">
+	<!ENTITY BP_Items				"0xD5125503">
+	<!ENTITY bp_FactionCalculator	"0xD5125506">
 	
-	<!ENTITY bp_itPlasmidGunner		"0xD5124101">
+	<!ENTITY bp_itPlasmidGunner		"0xD5125601">
 	
-	<!ENTITY bp_itMonoFilamentBlade	"0xD5124201">
+	<!ENTITY bp_itMonoFilamentBlade	"0xD5125651">
 ]>
 
 <TranscendenceExtension UNID="&BP_Items;" version="1.0">
@@ -16,37 +16,35 @@
 ;;;	The gears and cogs that battle is made of!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     <ItemType UNID="&bp_itPlasmidGunner;"
-        name            = "Plasmid Gunner"
-        level           = "1"
-        value           = "350"
-        mass            = "50"
-        frequency       = "uncommon"
-        numberAppearing = "1d3"
-        modifiers       = "TroopUnit; MinorItem;"
+        name=			"Plasmid Gunner"
+        level=			"1"
+        value=			"350"
+        mass=			"50"
+        frequency=		"common"
+        numberAppearing="1d3"
+        modifiers=		"TroopUnit; MinorItem;"
 
-        description     = "Plasmid Gunners are the most common simple boarding bot."
-        sortname        = "troop, plasmid gunner,"
+        description=	"Plasmid Gunners are the most common simple boarding bot."
+        sortname=		"troop, plasmid gunner,"
         >
-        <Image imageID="&rsItems1;"
-            imageX  = "192"
-            imageY  = "480"
-            imageW  = "96"
-            imageH  = "96"
-        />
+
+		<Image imageID="&rsItems1;" imageX="192" imageY="480" imageWidth="96" imageHeight="96"/>
+
         <StaticData>
 		
-			<Strength>		3	</Strength>
-			<Defense>		1	</Defense>
-			<Health>		2	</Health>
+			<Strength>30</Strength>
+			<Defense>10</Defense>
+			<Health>25</Health>
 			
-			<C3I>			1	</C3I>
-			<Stealth>		-2	</Stealth>
-			<Psionics>		-5	</Psionics>
-			<Hacker>		2	</Hacker>
-			<Healer>		-3	</Healer>
-			<Demolitions>	0	</Demolitions>
-			<Commando>		1	<Commando>
-			<Commander>		-1	</Commander>
+			<C3I>12</C3I>
+			<Stealth>22</Stealth>
+			<Psionics>5</Psionics>
+			<Hacker>29</Hacker>
+			<Healer>3</Healer>
+			<Demolitions>10</Demolitions>
+			<Commando>11</Commando>
+			<Commander>1</Commander>
+			<Desc>"Plasmid gunners are the most common and simple combat robots available."</Desc>
         </StaticData>
     </ItemType>
 	
@@ -56,23 +54,20 @@
 ;;;	These items allow more specialization of the character
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     <ItemType UNID="&bp_itMonoFilamentBlade;"
-        name            = "mono-filament blade"
-        level           = "4"
-        value           = "6350"
-        mass            = "5"
-        frequency       = "rare"
-        numberAppearing = "1"
-        modifiers       = "Commander; MajorItem;"
+        name=			"mono-filament blade"
+        level=			"4"
+        value=			"6350"
+        mass=			"5"
+        frequency=		"rare"
+        numberAppearing="1"
+        modifiers=		"Commander; MajorItem;"
 
-        description     = "This blade is constructed using nano tech to align individual atoms and ensure this blade never dulls."
-        sortname        = "commander, mono-filament blade,"
+        description=	"This blade is constructed using nano tech to align individual atoms and ensure this blade never dulls."
+        sortname=		"commander, mono-filament blade,"
         >
-        <Image imageID="&rsItems1;"
-            imageX  = "192"
-            imageY  = "480"
-            imageW  = "96"
-            imageH  = "96"
-        />
+
+		<Image imageID="&rsItems1;" imageX="192" imageY="480" imageWidth="96" imageHeight="96"/>
+
         <StaticData>
 		
 			<Strength>		2	</Strength>
@@ -85,13 +80,17 @@
 			<Hacker>		0	</Hacker>
 			<Healer>		0	</Healer>
 			<Demolitions>	0	</Demolitions>
-			<Commando>		0	<Commando>
+			<Commando>		0	</Commando>
 			<Commander>		0	</Commander>
         </StaticData>
     </ItemType>
 	
-	
-	;; This is our master item, containing all the stats for every sovereign
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;				Master Sovereign Data Holder
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; This is our master item, containing all the stats for every sovereign
+
 	<ItemType UNID=	"&bp_FactionCalculator;"
 			name=				"Faction Calculator"
 			virtual=			"true"

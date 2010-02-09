@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
 <!DOCTYPE TranscendenceExtension
 [
-	<!ENTITY BP_Logic				"0xD5125100">
+	<!ENTITY BP_Logic				"0xD5125502">
+	<!ENTITY bp_FactionCalculator	"0xD5125506">
+	<!ENTITY bp_itPlasmidGunner		"0xD5125601">
 ]>
 
 <TranscendenceExtension UNID="&BP_Logic;" version="1.0">
@@ -30,11 +32,17 @@
 			)
 		)
 	))
+	(setq battleOn (lambda Nil
+		(block Nil
+			(objAddItem gPlayerShip (itmCreate &bp_itPlasmidGunner; 1) 10)
+		)
+	))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;		Manipulating Player Data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;	Player data is kept on the playership because it will change as
-;;; the game progresses.
+;;; the game progresses.  I have borrowed the dsf helper funcs to 
+;;; minimize redundancy.
 
 	;; This function sets everything up and should only be run once
 	(setq bp_InitializePlayerData (lambda Nil
@@ -50,6 +58,7 @@
 				(objSetData gPlayerShip "Healer"	1)
 				(objSetData gPlayerShip "Demolition" 1)
 				(objSetData gPlayerShip "Commando"	1)
+				(objSetData gPlayerShip "Commander"	1)
 
 				(objSetData gPlayerShip "Tactics" 	1)
 				(objSetData gPlayerShip "bpCommXP" 	0)
@@ -65,38 +74,12 @@
 		)
 	))
 
-	(setq bp_GetPlayerData (lambda (stat)
-		(objGetData gPlayerShip stat)
-	))
-	(setq bp_SetPlayerData (lambda (stat data)
-		(objSetData gPlayerShip stat data)
-	))
-	
-	(setq bp_GetCommanderXP (lambda Nil
-		(objGetData gPlayerShip "bpCommXP")
-	))
-	(setq bp_AddCommanderXP (lambda (reward)
-		(objIncData gPlayerShip "bpCommXP" reward)
-	))
-	
-	(setq bp_GetCommanderPoints (lambda Nil
-		(objGetData gPlayerShip "bpCommPoints")
-	))
-	(setq bp_AddCommanderPoints (lambda (points)
-		(objIncData gPlayerShip "bpCommPoints" points)
-	))
-	
-	(setq bp_GetCommanderLevel (lambda Nil
-		(objGetData gPlayerShip "bpCommLevel")
-	))
-	(setq bp_SetCommanderLevel (lambda (level)
-		(objSetData gPlayerShip "bpCommLevel" level)
-	))
-	
+	;; If the player has enough xp to gain a level
+	;; return the new level, else returns nil
 	(setq bp_ComputeCommanderLevel (lambda Nil
 		(block (xp oldLvl newLvl)
-			(setq xp (bp_GetCommanderXP))
-			(setq oldLvl (bp_GetCommanderLevel))
+			(setq xp (dsf_getData 'bpCommXP))
+			(setq oldLvl (dsf_GetData 'bpCommLevel))
 			(switch
 				(leq xp 0)
 					(setq newLvl 1)
@@ -115,20 +98,42 @@
 				(leq xp 10000)
 					(setq newLvl 8)
 				(leq xp 25000)
-					(setq newLvl 8)
+					(setq newLvl 9)
 				(setq newLvl 10)
 			)
-			;; if we've gained enough xp for a new level
-			;; redirect to the commander upgrade screen
-			;; TODO: perhaps we should just make a note
-			;; and let the player go to the screen when they choose?
 			(if (gr newLvl oldLvl)
-				(block Nil
-					(bp_SetCommanderLevel newLvl)
-					(bp_AddCommanderPoints 5)
-					(bp_ScreenData 'CommanderUpgrade)
-				)
+				newLvl
+				Nil
 			)
+		)
+	))
+	
+	;; compute how much xp is needed to achieve the next level and return it
+	;; if max level returns 0
+	(setq bp_ComputeXPNeeded (lambda Nil
+		(block (xp lvl xpNeed)
+			(setq xp (dsf_GetData 'bpCommXP))
+			(setq lvl (dsf_GetData 'bpCommLvl))
+			(switch
+				(eq lvl 1)
+					(setq xpNeed (subtract xp 100))
+				(eq lvl 2)
+					(setq xpNeed (subtract xp 250))
+				(eq lvl 3)
+					(setq xpNeed (subtract xp 500))
+				(eq lvl 4)
+					(setq xpNeed (subtract xp 1000))
+				(eq lvl 5)
+					(setq xpNeed (subtract xp 2500))
+				(eq lvl 6)
+					(setq xpNeed (subtract xp 5000))
+				(eq lvl 7)
+					(setq xpNeed (subtract xp 10000))
+				(eq lvl 8)
+					(setq xpNeed (subtract xp 25000))
+				0
+			)
+			xpNeed
 		)
 	))
 			
@@ -153,8 +158,56 @@
 		data
 		)
 	))
+	(setq bp_GetEnemyTroopCount (lambda (sov)
+		(block (list data Found)
+			(setq list (itmGetStaticData &bp_FactionCalculator; sov))
+			(setq Found Nil)
+			(enumwhile list (not Found) thisEntry (block Nil
+				(if (eq (item thisEntry 0) stat)
+					(block nil
+						(setq min (item thisEntry 1))
+						(setq max (item thisEntry 2))
+						(setq data (random min max))
+						(setq Found True)
+					)
+				)
+			))
+		data
+		)
+	))
+	
+	;; Set up an enemy force to fight with
+	(setq bp_InitializeEnemy (lambda Nil
+		(block (sov lvl)
+			(setq sov (typGetDataField (objGetSovereign gSource) 'name))
+			(setq lvl (sysGetLevel))
+			(objSetData gSource "str" (bp_GetEnemyData sov 'Strength))
+			(objSetData gSource "def" (bp_GetEnemyData sov 'Defense))
+			(objSetData gSource "hp" (bp_GetEnemyData sov 'HP))
+			(objSetData gSource "c3i" (bp_GetEnemyData sov 'C3I))
+			(objSetData gSource "stl" (bp_GetEnemyData sov 'Stealth))
+			(objSetData gSource "psi" (bp_GetEnemyData sov 'Psionic))
+			(objSetData gSource "hack" (bp_GetEnemyData sov 'Hacker))
+			(objSetData gSource "heal" (bp_GetEnemyData sov 'Healer))
+			(objSetData gSource "dem" (bp_GetEnemyData sov 'Demolition))
+			(objSetData gSource "como" (bp_GetEnemyData sov 'Commando))
+			(objSetData gSource "num" (bp_GetEnemyTroopCount sov 'Troops))
+		)
+	))
+			
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;		Core mechanics and logic
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	
+	;; this function collects basic player data to determine how much
+	;; info is presented at the beginning of combat
+	(setq bp_InitializeBattle (lambda Nil
+		(block Nil
+		)
+	))
 )
 </Globals>
+
 <!---
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;							TACTICS

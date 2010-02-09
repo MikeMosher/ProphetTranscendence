@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <!DOCTYPE TranscendenceExtension
 [
-	<!ENTITY BP_Screens				"0xD5125000">
-	<!ENTITY itBoardingAdvertiser	"0xD5125001">
+	<!ENTITY BP_Screens				"0xD5125500">
+	<!ENTITY itBoardingAdvertiser	"0xD5125501">
 ]>
 
 <TranscendenceExtension UNID="&BP_Screens;" version="1.0">
@@ -32,6 +32,7 @@
 					'paneDesc       "Welcome to the boarding parties back door!"
 					'screenType     "CustomPicker"
 					'hideBack       True
+					'initFunc		'(bp_InitializePlayerData)
 					'customPicker   (list
 						;;;; Screen Browser
 						(list
@@ -80,7 +81,7 @@
 							'paneDesc   '("\n\nTaking the fight to a personal level." '+)
 							'actions    (list
 								(list
-									'name       '("View the Battle screen" 'B)
+									'name       '("View the Commander screen" 'B)
 									'runFunc    '(bp_ScreenData "CommanderMain")
 								))
 						)
@@ -98,13 +99,23 @@
 					'screenType     "Canvas"
 					'hideBack       True
 					'hideExit       Nil
+					
+					;; draw some pretty pics :)
+					'canvasFunc	'(block Nil
+						(cnvDrawrect 0 0 600 400 '(8 8 8))
+						(cnvDrawRect 100 100 400 200 '(255 0 0))
+						(cnvDrawText 300 200 "Warning, Enemies detected!" 'subTitle '(255 255 255) 'center)
+						)
+						
+					;; set up all our data for the enemy
+					;; mark that combat is init-ed 
 					'initFunc	'(block Nil
 						;; We have found enemy resistance so load up some data
 						;; find the player's C3I skill and perhaps some new ship
 						;; device to scan the target station/wreck for more accurate info
 						;; TODO: create these functions and decide what we need to do here
 						;; (bp_InitializeBattle)
-						;; (bp_InitializeEnemy)
+						(bp_InitializeEnemy)
 						)
 					'actions	(list
 						(list
@@ -114,6 +125,7 @@
 						(list
 							'name       '("Perform intensive scan" 'P)
 							'runFunc    '(bp_ScreenData "Scan")			;; TODO: this screen does not yet exist!
+							'hideFunc	'(not (objGetItems gPlayerShip "*I+BattleScan"))
 						)
 						(list
 							'name       '("Get suited up" 'G)
@@ -129,11 +141,14 @@
 			(eq screen "TacticMain")
 				(list
 					'screenName     "Choose your battle tactic wisely!"
+					'paneDesc       "The available options are dependent on the commander's tactic skill."
 					'screenType     "CustomPicker"
 					'hideBack       Nil
-					'hideExit       True
+					'hideExit       Nil
 					'customPicker   (list
 						;;;; Tactic Browser
+						;; TODO: decide whether we have one massive list and filter it or
+						;; many sub menus organized by category
 						(list
 							'title      "Offensive tactics, basic"
 							'subtitle   "Send in the troops."
@@ -153,7 +168,6 @@
 							'title      "Defensive tactics, basic"
 							'subtitle   "Pull the troops out."
 							'paneDesc   '("\n\nThe second most basic strategy ever: run away." '+)
-							'hideList   '(True)
 							'actions	(list
 								(list
 									'name       '("Retreat" 'R)
@@ -169,8 +183,8 @@
 							'title      "Psionic Attack"
 							'subtitle   "Use those egg heads to their full potential."
 							'paneDesc   '("\n\nWhy kill your enemies when you can enslave them?" '+)
-							'hideList   '(and (geq (bp_GetPlayerData "Tactics") 4)
-								(geq (bp_GetPlayerData "Psionics") 1))
+							'hideList   '(and (geq (dsf_GetData "Tactics") 4)
+								(geq (dsf_GetData "Psionics") 1))
 							'actions	(list
 								(list
 									'name       '("Mind Blast" 'M)
@@ -187,13 +201,13 @@
 										;; then move onto selecting appropriate troops
 										(bp_ScreenData "TroopMain")
 										)
-									'hideList   '(geq (bp_GetPlayerData "Psionics") 5)
+									'hideList   '(geq (dsf_GetData "Psionics") 5)
 									)
 								)
 							)
 							
-						)
-					)
+						) ;; custom picker end
+					) ;; tacticMain end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;						TROOP SCREENS
@@ -202,22 +216,106 @@
 			(eq screen "TroopSelect")
 				(list
 					'screenName     "Troop select"
-					'screenType     "ItemPickerPlayer"
-					'itemFilter     "* +TroopItem;"
+					'paneDesc       "Select which troop units you will commit to battle."
+					'screenType     "CustomPicker"
+					'itemFilter     "* +TroopUnit;"
 					'noSave         True
 					'hideBack       Nil
 					'hideExit       True
+					'actions            (list
+						(list
+							'name       '("Select" 'S)
+							'hideFunc	'(itmGetData (dsf_GetListEntryData 'troop) "Committed")
+							'runFunc    '(block Nil
+								(if (gr (itmGetCount (dsf_GetListEntryData 'troop)) 1)
+									(block Nil
+										(dsf_SetScreenState 'troop (dsf_GetListEntryData 'troop))
+										(bp_ScreenData 'TroopCount)
+										)
+									(block Nil
+										(objSetItemData gPlayerShip (dsf_GetListEntryData 'troop) "Committed" True 1)
+										(dsf_SetScreenState 'troop (dsf_GetListEntryData 'troop))
+										(scrSetDesc gScreen (cat (itmGetName (dsf_GetListEntryData 'troop) 8)" committed to battle."))
+										)
+									)
+								)
+							)
+						(list
+							'name       '("De-Select" 'D)
+							'hideFunc	'(eq (itmGetData (dsf_GetListEntryData 'troop) "Committed") Nil)
+							'runFunc    '(block Nil
+								(objSetItemData gPlayerShip (dsf_GetListEntryData 'troop) "Committed" Nil (itmGetCount (dsf_GetListEntryData 'troop)))
+								(dsf_BuildPaneDesc ("\nTroops de-selected for combat."))
+								)
+							)
+						)
+					'customPicker	(block (tList)
+						(setq displayList (list))
+						(objEnumItems gPlayerShip "* +TroopUnit;" troop (block Nil
+							(lnkAppend displayList
+								(list
+									'title      (cat (itmGetName troop 8) (if (itmGetData troop "Committed") " - Committed" ""))
+									'image		(itmGetImageDesc troop)
+									'subtitle   (cat (itmGetStaticData troop "Desc")
+										" | Strength: "(itmGetStaticData troop "Strength")" | Defense: "(itmGetStaticData troop "Defense")" | Health: "(itmGetStaticData troop "Health")
+										" | C3I: "(itmGetStaticData troop "C3I")" | Stealth: "(itmGetStaticData troop "Stealth")" | Psionics: "(itmGetStaticData troop "Psionics")
+										" | Hacker: "(itmGetStaticData troop "Hacker")" | Healer: "(itmGetStaticData troop "Healer")" | Demolitions: "(itmGetStaticData troop "Demolitions")
+										" | Commando: "(itmGetStaticData troop "Commando")" | Commander: "(itmGetStaticData troop "Commander")
+										)
+									'troop		troop
+									)
+								)
+							))
+							displayList
+						)
 					)
 			;; Select the number of troops to be sent in
 			(eq screen "TroopCount")
 				(list
 					'screenName     "Troop select, count"
+					'paneDesc       "Your commander skill limits the number of troops that you can command at one time."
+					'paneType       "Counter"
 					'hideBack       Nil
 					'hideExit       True
-					'initFunc	'(block Nil
+					'initFunc	'(block (maxCount commanderMaxCount)
+						(setq maxCount (itmGetCount (dsf_GetScreenState 'troop)))
+						(setq commanderMaxCount (dsf_GetData 'commander))
+						(scrSetCounter gScreen (min maxCount commanderMaxCount))
+						(dsf_BuildPaneDesc (list (cat "\nCommander Max: "commanderMaxCount) '+))
 						)
 					'actions	(list
 						(list
+							'name       '("Set" 'S)
+							'runFunc    '(block (troop cnt maxCount commanderMaxCount)
+								(setq troop (dsf_GetScreenState 'troop))
+								(setq maxCount (itmGetCount troop))
+								(setq commanderMaxCount (dsf_GetData 'commander))
+								(setq cnt (scrGetCounter gScreen))
+								(switch
+									(ls cnt 0)
+										(block Nil
+											(dsf_BuildPaneDesc "\nInvalid amount.")
+											(bp_ScreenData 'TroopCount)
+											)
+									
+									(gr cnt maxCount)
+										(block Nil
+											(dsf_BuildPaneDesc "\nYou do not have enough troops.")
+											(bp_ScreenData 'TroopCount)
+											)
+									
+									(gr cnt commanderMaxCount)
+										(block Nil
+											(dsf_BuildPaneDesc "\nYou cannot command that many troops.")
+											(bp_ScreenData 'TroopCount)
+											)
+											
+									(block nil
+										(objSetItemData gPlayerShip troop "Committed" True cnt)
+										(bp_ScreenData 'TroopSelect)
+										)
+									)
+								)
 							)
 						)
 					)
@@ -296,39 +394,66 @@
 ;;					COMMANDER SCREENS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This screen is the entry point to the commander screens
+;; It provides alot of handy info on the commander as well as links to other
+;; important screens
+
 			(eq screen "CommanderMain")
 				(list
 					'screenName     "Character Screen"
 					'screenType     "Canvas"
 					'hideBack       Nil
 					'hideExit       Nil
-					'initFunc	'(block Nil
-						(dsf_SetScreenData 'canvasFunc (block Nil
-							(dsf_DrawText ("Commander stats" nil nil 'Large 100 100 '(128 128 128) 'Left))
-							(dsf_DrawText ("Strength: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Defense: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("HP: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Tactics: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Level: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("XP: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Xp needed for next level: " nil 30 'small nil nil '(128 128 128) 'Left))
+					'canvasFunc	'(block Nil
+						(dsf_SetScreenData 'canvasFunc (block (str def hp tac lvl xp xpnext c3i stl psi hack heal dem como comr win lose)
+							(setq str (dsf_GetData 'Strength))
+							(setq def (dsf_GetData 'Defense))
+							(setq hp (dsf_GetData 'HP))
+							(setq tac (dsf_GetData 'Tactics))
+							(setq lvl (dsf_GetData 'bpCommLevel))
+							(setq xp (dsf_GetData 'bpCommXP))
+							(setq xpnext (bp_ComputeXPNeeded))
+							(setq points (dsf_GetData 'bpCommPoints))
+							(setq c3i (dsf_GetData 'C3I))
+							(setq stl (dsf_GetData 'Stealth))
+							(setq psi (dsf_GetData 'Psionic))
+							(setq hack (dsf_GetData 'Hacker))
+							(setq heal (dsf_GetData 'Healer))
+							(setq dem (dsf_GetData 'Demolition))
+							(setq como (dsf_GetData 'Commando))
+							(setq comr (dsf_GetData 'Commander))
+							(setq win (dsf_GetData 'bpVictories))
+							(setq lose (dsf_GetData 'bpFailures))
 							
-							(dsf_DrawText ("Skills" 300 100 'Large 100 100 '(128 128 128) 'Left))
-							(dsf_DrawText ("C3I: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Psionics: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Hacker: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Healer: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Demolition: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Commando: " nil 30 'small nil nil '(128 128 128) 'Left))
-							(dsf_DrawText ("Commander: " nil 30 'small nil nil '(128 128 128) 'Left))
-							)
-						(dsf_DisplayCanvas)
-						))
+							(cnvDrawRect 0 0 600 400 '(8 8 8))
+							
+							(dsf_DrawText "Commander stats" nil nil 'HeaderBold 90 30 '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Strength: "str) 	nil 60 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Defense: "def) 		nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "HP: "hp) 			nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Tactics: "tac) 		nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Level: "lvl) 		nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "XP: "xp) 			nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Xp needed: "xpnext)	nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Free points: "points) nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Victories: "win)	nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Losses: "lose)	 	nil 30 'Medium nil nil '(255 255 255) 'Left)
+							
+							(dsf_DrawText "Skills" 					nil nil 'HeaderBold 300 30 '(255 255 255) 'Left)
+							(dsf_DrawText (cat "C3I: "c3i) 			nil 60 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Stealth: "stl)		nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Psionics: "psi) 	nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Hacker: "hack)		nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Healer: "heal) 		nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Demolition: "dem) 	nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Commando: "como) 	nil 30 'Medium nil nil '(255 255 255) 'Left)
+							(dsf_DrawText (cat "Commander: "comr) 	nil 30 'Medium nil nil '(255 255 255) 'Left)
+							))
+						)
 					'actions	(list
 						(list
 							'name       '("Spend skill points" 'S)
 							'runFunc    '(bp_ScreenData "CommanderUpgrade")
-							'hideFunc	'(gr (bp_GetCommanderPoints) 0)
+							'hideFunc	'(if (gr (dsf_GetData 'bpCommPoints) 0) True Nil)
 							)
 						(list
 							'name       '("View personal inventory" 'V)
@@ -336,6 +461,7 @@
 							)
 						)
 					)
+					
 			;; This screen is displayed when the player has achieved a new level
 			(eq screen "CommanderUpgrade")
 				(list
