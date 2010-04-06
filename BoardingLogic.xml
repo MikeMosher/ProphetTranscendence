@@ -3,7 +3,9 @@
 [
 	<!ENTITY BP_Logic				"0xD5125502">
 	<!ENTITY bp_FactionCalculator	"0xD5125506">
+
 	<!ENTITY bp_itPlasmidGunner		"0xD5125601">
+	<!ENTITY bp_itMonoFilamentBlade	"0xD5125651">
 ]>
 
 <TranscendenceExtension UNID="&BP_Logic;" version="1.0">
@@ -35,30 +37,32 @@
 	(setq battleOn (lambda Nil
 		(block Nil
 			(objAddItem gPlayerShip (itmCreate &bp_itPlasmidGunner; 1) 10)
+			(objAddItem gPlayerShip (itmCreate &bp_itMonoFilamentBlade; 1))
 		)
 	))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;		Manipulating Player Data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;	Player data is kept on the playership because it will change as
-;;; the game progresses.  I have borrowed the dsf helper funcs to 
-;;; minimize redundancy.
+
+	;;;	Player data is kept on the playership because it will change as
+	;;; the game progresses.  I have borrowed the dsf helper funcs to 
+	;;; minimize redundancy.
 
 	;; This function sets everything up and should only be run once
 	(setq bp_InitializePlayerData (lambda Nil
 		(if (not (objGetData gPlayerShip "bpInitialized"))
 			(block Nil
-				(objSetData gPlayerShip "Strength"	1)
-				(objSetData gPlayerShip "Defense"	1)
-				(objSetData gPlayerShip "HP"		1)
-				(objSetData gPlayerShip "C3I"		1)
-				(objSetData gPlayerShip "Stealth"	1)
-				(objSetData gPlayerShip "Psionic"	1)
-				(objSetData gPlayerShip "Hacker"	1)
-				(objSetData gPlayerShip "Healer"	1)
-				(objSetData gPlayerShip "Demolition" 1)
-				(objSetData gPlayerShip "Commando"	1)
-				(objSetData gPlayerShip "Commander"	1)
+				(objSetData gPlayerShip "Strength"	10)
+				(objSetData gPlayerShip "Defense"	10)
+				(objSetData gPlayerShip "HP"		10)
+				(objSetData gPlayerShip "C3I"		10)
+				(objSetData gPlayerShip "Stealth"	10)
+				(objSetData gPlayerShip "Psionic"	10)
+				(objSetData gPlayerShip "Hacker"	10)
+				(objSetData gPlayerShip "Healer"	10)
+				(objSetData gPlayerShip "Demolition" 10)
+				(objSetData gPlayerShip "Commando"	10)
+				(objSetData gPlayerShip "Commander"	10)
 
 				(objSetData gPlayerShip "Tactics" 	1)
 				(objSetData gPlayerShip "bpCommXP" 	0)
@@ -144,30 +148,16 @@
 ;;; throughout the game and is modified dynamically to suit our needs
 
 	(setq bp_GetEnemyData (lambda (sov stat)
-		(block (list data Found)
-			(setq list (itmGetStaticData &bp_FactionCalculator; sov))
+		(block (sovlist data Found)
+			(setq sovlist (itmGetStaticData (itmCreate &bp_FactionCalculator; 0) sov))
 			(setq Found Nil)
-			(enumwhile list (not Found) thisEntry (block Nil
+			(enumwhile sovlist (not Found) thisEntry (block Nil
 				(if (eq (item thisEntry 0) stat)
 					(block nil
-						(setq data (item thisEntry 1))
-						(setq Found True)
-					)
-				)
-			))
-		data
-		)
-	))
-	(setq bp_GetEnemyTroopCount (lambda (sov)
-		(block (list data Found)
-			(setq list (itmGetStaticData &bp_FactionCalculator; sov))
-			(setq Found Nil)
-			(enumwhile list (not Found) thisEntry (block Nil
-				(if (eq (item thisEntry 0) stat)
-					(block nil
-						(setq min (item thisEntry 1))
-						(setq max (item thisEntry 2))
-						(setq data (random min max))
+						(if (eq stat 'name)
+							(setq data (item thisEntry 1))
+							(setq data (random (item thisEntry 1) (item thisEntry 2)))
+							)
 						(setq Found True)
 					)
 				)
@@ -178,33 +168,163 @@
 	
 	;; Set up an enemy force to fight with
 	(setq bp_InitializeEnemy (lambda Nil
-		(block (sov lvl)
-			(setq sov (typGetDataField (objGetSovereign gSource) 'name))
-			(setq lvl (sysGetLevel))
-			(objSetData gSource "str" (bp_GetEnemyData sov 'Strength))
-			(objSetData gSource "def" (bp_GetEnemyData sov 'Defense))
-			(objSetData gSource "hp" (bp_GetEnemyData sov 'HP))
-			(objSetData gSource "c3i" (bp_GetEnemyData sov 'C3I))
-			(objSetData gSource "stl" (bp_GetEnemyData sov 'Stealth))
-			(objSetData gSource "psi" (bp_GetEnemyData sov 'Psionic))
-			(objSetData gSource "hack" (bp_GetEnemyData sov 'Hacker))
-			(objSetData gSource "heal" (bp_GetEnemyData sov 'Healer))
-			(objSetData gSource "dem" (bp_GetEnemyData sov 'Demolition))
-			(objSetData gSource "como" (bp_GetEnemyData sov 'Commando))
-			(objSetData gSource "num" (bp_GetEnemyTroopCount sov 'Troops))
-		)
+		;; check if we've already run
+		(if True ;; (not (objGetData gSource "initEnemyDone"))
+			(block (sov lvl)
+				(setq sov (sovHack (objGetSovereign gSource)))
+				(setq lvl (sysGetLevel))
+				(objSetData gSource "Name" (bp_GetEnemyData sov 'name))
+				(objSetData gSource "strength" (bp_GetEnemyData sov 'Strength))
+				(objSetData gSource "defense" (bp_GetEnemyData sov 'Defense))
+				(objSetData gSource "hp" (bp_GetEnemyData sov 'HP))
+				(objSetData gSource "c3i" (bp_GetEnemyData sov 'C3I))
+				(objSetData gSource "stealth" (bp_GetEnemyData sov 'Stealth))
+				(objSetData gSource "psionic" (bp_GetEnemyData sov 'Psionic))
+				(objSetData gSource "hacker" (bp_GetEnemyData sov 'Hacker))
+				(objSetData gSource "healer" (bp_GetEnemyData sov 'Healer))
+				(objSetData gSource "demolition" (bp_GetEnemyData sov 'Demolition))
+				(objSetData gSource "commando" (bp_GetEnemyData sov 'Commando))
+				(objSetData gSource "enemytroopCount" (bp_GetEnemyData sov 'Troops))
+				;; mark that we've been run
+				(objSetData gSource "initEnemyDone" True)
+				)
+			)
 	))
 			
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;		Core mechanics and logic
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
-	;; this function collects basic player data to determine how much
-	;; info is presented at the beginning of combat
+	;; this function collects basic player data
 	(setq bp_InitializeBattle (lambda Nil
-		(block Nil
+		;; check if we've already run
+		(if True ;; (not (objGetData gSource "initPlayerDone"))
+			(block Nil
+				;; collect the data from the player and place it on the spaceObj
+				;; we do this because these values will fluctuate and we want to 
+				;; preserve the 'base' values stored on the playership
+				(objSetData gSource "plyStrength" (objGetData gPlayerShip "Strength"))
+				(objSetData gSource "plyDefense" (objGetData gPlayerShip "Defense"))
+				(objSetData gSource "plyHP" (objGetData gPlayerShip "HP"))
+				(objSetData gSource "plyC3I" (objGetData gPlayerShip "C3I"))
+				(objSetData gSource "plyStealth" (objGetData gPlayerShip "Stealth"))
+				(objSetData gSource "plyPsionic" (objGetData gPlayerShip "Psionic"))
+				(objSetData gSource "plyHacker" (objGetData gPlayerShip "Hacker"))
+				(objSetData gSource "plyHealer" (objGetData gPlayerShip "Healer"))
+				(objSetData gSource "plyDemolition" (objGetData gPlayerShip "Demolition"))
+				(objSetData gSource "plyCommando" (objGetData gPlayerShip "Commando"))
+				(objSetData gSource "plyCommander" (objGetData gPlayerShip "Commander"))
+
+				;; initialize some default tactic vars
+				(objSetData gSource "tacStrength" 0)
+				(objSetData gSource "tacDefense" 0)
+				(objSetData gSource "tacHP" 0)
+				(objSetData gSource "tacC3I" 0)
+				(objSetData gSource "tacStealth" 0)
+				(objSetData gSource "tacPsionic" 0)
+				(objSetData gSource "tacHacker" 0)
+				(objSetData gSource "tacHealer" 0)
+				(objSetData gSource "tacDemolition" 0)
+				(objSetData gSource "tacCommando" 0)
+				;; mark the player-commander as not battling 
+				(objSetData gSource "plyCommitted" Nil)
+				;; mark that we've been run
+				(objSetData gSource "initPlayerDone" True)
+				)
 		)
 	))
+	
+	;; init function for the abandoned station dockscreens
+	;; it determines if there will be a battle or not
+	;; TODO: currently set up to make 100% of wrecks have battles for testing purposes
+	(setq intBoardingOnInit (lambda (prevPane)
+		(if True ;; (leq (objGetDestiny gSource) (multiply (sysGetLevel) 36))
+			(dsf_ShowDockScreen (bp_ScreenData 'Warning))
+			(scrShowPane gScreen prevPane)
+			)
+		))
+		
+	;; this function turns sov data into something I can use as a static data element
+	;; this took me about 5 hours fussing with it trying different things....
+	(setq sovHack (lambda (sov)
+		(switch
+			(eq sov 4097)
+				'Independent
+			(eq sov 4098)
+				'Commonwealth
+			(or (eq sov 4099) (eq sov 4100))
+				'IndMerch
+			(eq sov 4101)
+				'Charon
+			(eq sov 4102)
+				'Outlaws
+			(eq sov 4103)
+				'Ares1
+			(eq sov 4104)
+				'anarachists
+			(eq sov 4105)
+				'settlers
+			(eq sov 4106)
+				'cult
+			(eq sov 4107)
+				'rogue
+			(eq sov 4108)
+				'sung
+			(eq sov 4109)
+				'slaves
+			(eq sov 4110)
+				'desChaos
+			(or (eq sov 4111) (eq sov 4115))
+				'auton
+			(eq sov 4112)
+				'desOrder
+			(eq sov 4113)
+				'corporate
+			(eq sov 4114)
+				'BM
+			(or (eq sov 4116) (eq sov 4118))
+				'ferian
+			(eq sov 4117)
+				'ringers
+			(or (eq sov 1314817) (eq sov -591790014) (eq sov -591790013) (eq sov -591790012))
+				'gladiator
+			(eq sov 1708033)
+				'antarctica
+			(eq sov 1708034)
+				'CWFleet
+			(eq sov 1839105)
+				'iocrym
+			(eq sov 1839106)
+				'Ares2
+			(eq sov 1839107)
+				'AI
+			(eq sov 2101249)
+				'domina
+			(eq sov 134283333)
+				'heliotropes
+			(eq sov 134348880)
+				'Centauri
+			(eq sov 134348932)
+				'kobol
+			(eq sov 134349003)
+				'luminous
+			(eq sov 134349058)
+				'huari
+			(eq sov 134349120)
+				'dwarg
+			(eq sov 134349133)
+				'zoanthropes
+			(eq sov 134414409)
+				'marauders
+			(eq sov 134414594)
+				'himal
+			(eq sov 134414656)
+				'urak
+			(eq sov 134480195)
+				'gaian
+			'misc
+			)
+		))
 )
 </Globals>
 
