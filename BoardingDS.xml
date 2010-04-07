@@ -200,7 +200,7 @@
 						;; We have found enemy resistance so load up some data
 						;; find the player's C3I skill and perhaps some new ship
 						;; device to scan the target station/wreck for more accurate info
-						(bp_InitializePlayerData)
+						(bp_InitializePlayerData)  ;; this should be moved elsewhere so it only runs once
 						(bp_InitializeBattle)
 						(bp_InitializeEnemy)
 						)
@@ -254,8 +254,8 @@
 									'name       '("Select" 'S)
 									'runFunc    '(block Nil
 										(dsf_SetScreenState "Tactic" 'retreat)
-										(objSetData gSource "tacDefense" 100)
-										(objSetData gSource "tacStrength" -100)
+										(objSetData gSource "tacDefense" 10)
+										(objSetData gSource "tacStrength" -3)
 										(bp_ScreenData "TroopSelect")
 										)
 									)
@@ -272,9 +272,9 @@
 									'name       '("Select" 'S)
 									'runFunc    '(block Nil
 										(dsf_SetScreenState "Tactic" 'psionic)
-										(objSetdata gsource "tacPsionic" 50)
-										(objSetData gSource "tacDefense" 100)
-										(objSetData gSource "tacStrength" -50)
+										(objSetdata gsource "tacPsionic" 5)
+										(objSetData gSource "tacDefense" 10)
+										(objSetData gSource "tacStrength" -2)
 										(bp_ScreenData "TroopSelect")
 										)
 									)
@@ -321,7 +321,7 @@
 							)
 						) ;; end of actions
 
-					'customPicker	(block (tList)
+					'customPicker	(block (displayList)
 						(setq displayList (list))
 						(objEnumItems gPlayerShip "* +TroopUnit;" troop (block Nil
 							(lnkAppend displayList
@@ -529,7 +529,7 @@
 					'canvasFunc		'(block (enemyTroopcount enemyTotStr enemyTotDef enemyTotHP enemyTotC3I enemyTotStealth
 						enemyTotPsi enemyTotHack enemyTotHeal enemyTotDemo enemyTotComo plyTroopcount plyTroopStr plyTroopDef
 						plyTroopHP plyTroopC3I plyTroopStealth plyTroopPsi plyTroopHack plyTroopHeal plyTroopDemo plyTroopComo
-						plyTactic)
+						plyTactic newEnemyTotHP NewplyTroopHP)
 						
 						;; first, we must collect all the necessary data, and it is a lot
 						;; start with enemy data
@@ -547,17 +547,17 @@
 						
 						;; now the player's troop totals
 						(setq plyTactic (dsf_GetScreenState "Tactic"))
-						(setq plyTroopcount (dsf_GetScreenState "plyTroopCount" cnt))
-						(setq plyTroopStr (dsf_GetScreenState "plyTroopStrength" str))
-						(setq plyTroopDef (dsf_GetScreenState "plyTroopDefense" def))
-						(setq plyTroopHP (dsf_GetScreenState "plyTroopHealth" HP))
-						(setq plyTroopC3I (dsf_GetScreenState "plyTroopC3I" c3i))
-						(setq plyTroopStealth (dsf_GetScreenState "plyTroopStealth" stealth))
-						(setq plyTroopPsi (dsf_GetScreenState "plyTroopPsionics" psi))
-						(setq plyTroopHack (dsf_GetScreenState "plyTroophacker" hacker))
-						(setq plyTroopHeal (dsf_GetScreenState "plyTroopHealer" healer))
-						(setq plyTroopDemo (dsf_GetScreenState "plyTroopDemolitions" demo))
-						(setq plyTroopComo (dsf_GetScreenState "plyTroopCommando" commando))
+						(setq plyTroopcount (dsf_GetScreenState "plyTroopCount"))
+						(setq plyTroopStr (dsf_GetScreenState "plyTroopStrength"))
+						(setq plyTroopDef (dsf_GetScreenState "plyTroopDefense"))
+						(setq plyTroopHP (dsf_GetScreenState "plyTroopHealth"))
+						(setq plyTroopC3I (dsf_GetScreenState "plyTroopC3I"))
+						(setq plyTroopStealth (dsf_GetScreenState "plyTroopStealth"))
+						(setq plyTroopPsi (dsf_GetScreenState "plyTroopPsionics"))
+						(setq plyTroopHack (dsf_GetScreenState "plyTroophacker"))
+						(setq plyTroopHeal (dsf_GetScreenState "plyTroopHealer"))
+						(setq plyTroopDemo (dsf_GetScreenState "plyTroopDemolitions"))
+						(setq plyTroopComo (dsf_GetScreenState "plyTroopCommando"))
 						
 						;; check if the player-commander is committed and increment the totals to account for them
 						(if (eq (objGetData gSource "plyCommitted") True)
@@ -587,6 +587,29 @@
 						(setq plyTroopDemo (add plyTroopDemo (multiply plyTroopCount (objGetData gSource "tacDemolition"))))
 						(setq plyTroopComo (add plyTroopComo (multiply plyTroopCount (objGetData gSource "tacCommando"))))
 
+						;; to avoid nasty errors we add 1 to all stats that are zero
+						(if (eq 0 enemyTroopcount) (setq enemyTroopcount 1))
+						(if (eq 0 enemyTotStr) (setq enemyTotStr 1))
+						(if (eq 0 enemyTotDef) (setq enemyTotDef 1)) 
+						(if (eq 0 enemyTotHP) (setq enemyTotHP 1))
+						(if (eq 0 enemyTotC3I) (setq enemyTotC3I 1))
+						(if (eq 0 enemyTotStealth) (setq enemyTotStealth 1))
+						(if (eq 0 enemyTotPsi) (setq enemyTotPsi 1))
+						(if (eq 0 enemyTotHack) (setq enemyTotHack 1))
+						(if (eq 0 enemyTotHeal) (setq enemyTotHeal 1))
+						(if (eq 0 enemyTotDemo) (setq enemyTotDemo 1))
+						(if (eq 0 enemyTotComo) (setq enemyTotComo 1))
+						(if (eq 0 plyTroopStr) (setq plyTroopStr 1))
+						(if (eq 0 plyTroopDef) (setq plyTroopDef 1)) 
+						(if (eq 0 plyTroopHP) (setq plyTroopHP 1))
+						(if (eq 0 plyTroopC3I) (setq plyTroopC3I 1))
+						(if (eq 0 plyTroopStealth) (setq plyTroopStealth 1))
+						(if (eq 0 plyTroopPsi) (setq plyTroopPsi 1))
+						(if (eq 0 plyTroopHack) (setq plyTroopHack 1))
+						(if (eq 0 plyTroopHeal) (setq plyTroopHeal 1))
+						(if (eq 0 plyTroopDemo) (setq plyTroopDemo 1))
+						(if (eq 0 plyTroopComo) (setq plyTroopComo 1))
+
 						;; display all the totals before comparisons are made
 						(dsf_DrawText "Player / Enemy" nil nil 'Medium 200 60 '(255 255 255) 'center)
 						(dsf_DrawText (cat "troop count: "plyTroopCount" / "enemyTroopcount) nil 20 'Medium nil nil '(255 255 255) 'center)
@@ -601,6 +624,7 @@
 						(dsf_DrawText (cat "Demolitions: "plyTroopDemo" / "enemyTotDemo) nil 20 'Medium nil nil '(255 255 255) 'center)
 						(dsf_DrawText (cat "Commando: "plyTroopComo" / "enemyTotcomo) nil 20 'Medium nil nil '(255 255 255) 'center)
 
+						
 			;; now we can compare all the stats and make modifications before finally dealing damage
 			;; the order that the stats are compared is important for dependencies
 			;; TODO: build these into helper functions to make it easier to read
@@ -630,6 +654,12 @@
 									(setq plyTroopC3I (divide (multiply plyTroopC3I 3) 2))
 									(setq plyTroopHack (divide (multiply plyTroopHack 3) 2))
 									(setq plyTroopStealth (divide (multiply plyTroopStealth 3) 2))
+									)
+							(gr plyTroopPsi enemyTotPsi)
+								(block nil
+									(setq plyTroopC3I (divide (multiply plyTroopC3I 5) 4))
+									(setq plyTroopHack (divide (multiply plyTroopHack 5) 4))
+									(setq plyTroopStealth (divide (multiply plyTroopStealth 5) 4))
 									)
 							(geq (divide enemyTotPsi plyTroopPsi) 2)
 								(block nil
@@ -679,6 +709,11 @@
 									(setq plyTroopC3I (divide (multiply plyTroopC3I 3) 2))
 									(setq plyTroopDemo (divide (multiply plyTroopDemo 3) 2))
 									)
+							(gr plyTroopHack enemyTotHack)
+								(block Nil
+									(setq plyTroopC3I (divide (multiply plyTroopC3I 5) 4))
+									(setq plyTroopDemo (divide (multiply plyTroopDemo 5) 4))
+									)
 							(geq (divide enemyTotHack plyTroopHack) 2)
 								(block Nil
 									(setq plyTroopC3I (divide (multiply plyTroopC3I 2) 3))
@@ -726,6 +761,12 @@
 									(setq plyTroopStr (divide (multiply plyTroopStr 3) 2))
 									(setq plyTroopDef (divide (multiply plyTroopDef 3) 2))
 									(setq plyTroopComo (divide (multiply plyTroopcomo 3) 2))
+									)
+							(gr plyTroopC3I enemyTotC3I)
+								(block Nil
+									(setq plyTroopStr (divide (multiply plyTroopStr 5) 4))
+									(setq plyTroopDef (divide (multiply plyTroopDef 5) 4))
+									(setq plyTroopComo (divide (multiply plyTroopcomo 5) 4))
 									)
 							(geq (divide enemyTotC3I plyTroopC3I) 2)
 								(block Nil
@@ -779,6 +820,12 @@
 									(setq plyTroopDef (divide (multiply plyTroopDef 3) 2))
 									(setq plyTroopDemo (divide (multiply plyTroopDemo 3) 2))
 									)
+							(gr plyTroopcomo enemyTotcomo)
+								(block Nil
+									(setq plyTroopStr (divide (multiply plyTroopStr 5) 4))
+									(setq plyTroopDef (divide (multiply plyTroopDef 5) 4))
+									(setq plyTroopDemo (divide (multiply plyTroopDemo 5) 4))
+									)
 							(geq (divide enemyTotComo plyTroopcomo) 2)
 								(block Nil
 									(setq plyTroopStr (divide (multiply plyTroopStr 2) 3))
@@ -815,6 +862,8 @@
 								(setq enemyTotDef (divide enemyTotDef 2))
 							(geq (divide plyTroopStealth enemyTotStealth) 2)
 								(setq enemyTotDef (multiply (divide enemyTotDef 2) 3))
+							(gr plyTroopStealth enemyTotStealth)
+								(setq enemyTotDef (multiply (divide enemyTotDef 4) 5))
 							(geq (divide enemyTotStealth plyTroopStealth) 2)
 								(setq plyTroopDef (multiply (divide plyTroopDef 2) 3))
 							(geq (divide enemyTotStealth plyTroopStealth) 3)
@@ -835,6 +884,8 @@
 								(setq plyTroopHP (multiply plyTroopHP 2))
 							(geq (divide plyTroopHeal enemyTotHeal) 2)
 								(setq plyTroopHP (divide (multiply plyTroopHP 3) 2))
+							(gr plyTroopHeal enemytotHeal)
+								(setq plyTroopHP (divide (multiply plyTroopHP 5) 4))
 							(geq (divide enemyTotHeal plyTroopHeal) 2)
 								(setq enemyTotHP (divide (multiply enemyTotHP 3) 2))
 							(geq (divide enemyTotStealth plyTroopStealth) 3)
@@ -848,15 +899,17 @@
 						;; compare demolition stats and modify health
 						(switch
 							(geq (divide plyTroopDemo enemyTotDemo) 10)
-								(setq enemyTotHealth (multiply enemyTotHealth 5))
+								(setq enemyTotHp (divide enemyTotHp 5))
 							(geq (divide plyTroopDemo enemyTotDemo) 5)
-								(setq enemyTotHealth (multiply enemyTotHealth 3))
+								(setq enemyTotHp (divide enemyTotHp 3))
 							(geq (divide plyTroopDemo enemyTotDemo) 3)
-								(setq enemyTotHealth (multiply enemyTotHealth 2))
+								(setq enemyTotHp (divide enemyTotHp 2))
 							(geq (divide plyTroopDemo enemyTotDemo) 2)
-								(setq enemyTotHealth (divide (multiply plyTroopHP 3) 2))
+								(setq enemyTotHp (divide (multiply enemyTotHp 2) 3))
+							(gr plyTroopDemo enemyTotDemo)
+								(setq enemyTotHp (divide (multiply enemyTotHp 4) 5))
 							(geq (divide enemyTotDemo plyTroopDemo) 2)
-								(setq plyTroopHP (divide (multiply plyTroopHP 3) 2))
+								(setq plyTroopHP (divide (multiply plyTroopHP 2) 3))
 							(geq (divide enemyTotDemo plyTroopDemo) 3)
 								(setq plyTroopHP (divide plyTroopHP 2))
 							(geq (divide enemyTotDemo plyTroopDemo) 5)
@@ -866,15 +919,46 @@
 							)
 
 						;; finally, we compare strength to defense and modify health
-						(setq enemyTotHP (subtract enemyTotHP (subtract plyTroopStr enemytotDef)))
-						(setq plyTroopHP (subtract plyTroopHP (subtract enemyTotStr plyTroopDef)))
-								
+						(setq newEnemyTotHP (subtract enemyTotHP (subtract plyTroopStr enemytotDef)))
+						(setq NewplyTroopHP (subtract plyTroopHP (subtract enemyTotStr plyTroopDef)))
+
+						(if (ls newEnemyTotHP enemyTotHP)
+							(block (dmg enemyCasualties)
+								(setq dmg (subtract enemyTotHp newEnemyTotHP))
+								(setq enemyCasualties (divide dmg (bp_GetEnemyData (sovHack (objGetSovereign gSource)) 'HP)))
+								(setq enemyTroopCount (subtract enemyTroopCount enemyCasualties))
+								(objIncData gSource "enemyTroopcount" (multiply enemyCasualties -1))
+								)
+							)
+						(if (ls newPlyTroopHP plyTroopHP)
+							(block (dmg plyCasualties committed)
+								(setq dmg (subtract plyTroopHp newPlyTroopHP))
+								(enum (objGetItems gPlayerShip "* +TroopUnit") thisItem
+									(if (and (geq dmg (itmGetStaticData thisItem "Health")) 
+											(eq (itmGetData thisItem "committed") True)
+											)
+											(block nil
+												;; increment the damage total
+												(setq dmg (subtract dmg (itmGetStaticData thisItem "Health")))
+												;; remove the committed status
+												(objSetItemData gPlayerShip thisItem "Committed" Nil 1)
+												;; track our casualties
+												(setq plyTroopCount (subtract plyTroopCount 1))
+												(dsf_setScreenState "plyTroopCount" (subtract (dsf_GetScreenState "plyTroopCount") 1))
+												;; remove the destroyed troop
+												(objRemoveItem gPlayerShip (itmCreate (itmGetUnid thisItem) 1) 1)
+												)
+										)
+									)
+								)
+							)
+
 						;; display all the totals after comparisons are made
 						(dsf_DrawText "Player / Enemy" nil nil 'Medium 500 60 '(255 255 255) 'center)
 						(dsf_DrawText (cat "troop count: "plyTroopCount" / "enemyTroopcount) nil 20 'Medium nil nil '(255 255 255) 'center)
 						(dsf_DrawText (cat "strength: "plyTroopStr" / "enemyTotStr) nil 20 'Medium nil nil '(255 255 255) 'center)
 						(dsf_DrawText (cat "defense: "plyTroopDef" / "enemyTotDef) nil 20 'Medium nil nil '(255 255 255) 'center)
-						(dsf_DrawText (cat "health: "plyTroopHP" / "enemyTotHp) nil 20 'Medium nil nil '(255 255 255) 'center)
+						(dsf_DrawText (cat "health: "NewplyTroopHP" / "NewenemyTotHp) nil 20 'Medium nil nil '(255 0 0) 'center)
 						(dsf_DrawText (cat "C3I : "plyTroopC3I" / "enemyTotC3I) nil 20 'Medium nil nil '(255 255 255) 'center)
 						(dsf_DrawText (cat "Stealth: "plyTroopStealth" / "enemyTotStealth) nil 20 'Medium nil nil '(255 255 255) 'center)
 						(dsf_DrawText (cat "Psionics: "plyTroopPsi" / "enemyTotPsi) nil 20 'Medium nil nil '(255 255 255) 'center)
@@ -882,61 +966,120 @@
 						(dsf_DrawText (cat "Healer: "plyTroopHeal" / "enemyTotHeal) nil 20 'Medium nil nil '(255 255 255) 'center)
 						(dsf_DrawText (cat "Demolitions: "plyTroopDemo" / "enemyTotDemo) nil 20 'Medium nil nil '(255 255 255) 'center)
 						(dsf_DrawText (cat "Commando: "plyTroopComo" / "enemyTotcomo) nil 20 'Medium nil nil '(255 255 255) 'center)
+						
 						)
 					'actions		(list
-						)
-					)
-			;; This screen will display the battle with as much detail as possible
-			;; possibly even run automatically with optional interrupts to change
-			;; tactics or use special abilities
-			(eq screen "BattleMain")
-				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
-					'hideBack       Nil
-					'hideExit       Nil
-					'initFunc	'(block Nil
-						)
-					'actions	(list
 						(list
+							'name       '("Continue" 'C)
+							'runFunc    '(block (enemyTroopCount plyTroopCount plyCommitted)
+								(setq enemyTroopCount (objGetData gSource "enemyTroopCount"))
+								(setq plyTroopCount (dsf_GetScreenState "plyTroopCount"))
+								(setq plyCommitted (objGetData gSource "plyCommitted"))
+								;; check if there are any enemy troops left alive
+								(switch
+									(leq enemyTroopcount 0)
+										(bp_screenData 'BattleWin)
+									(and (leq plyTroopcount 0) (eq plyCommitted True))
+										(bp_ScreenData 'BattlePK)
+									(leq plyTroopcount 0)
+										(bp_screenData 'BattleLose)
+									(bp_screenData 'TacticMain)
+									)
+								)
 							)
 						)
 					)
 			;; Combat successful
 			(eq screen "BattleWin")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
-					'hideBack       Nil
-					'hideExit       Nil
-					'initFunc	'(block Nil
+					'screenName     "Victory!!!"
+					'paneDesc       "You have subdued all resistance!\n\nThe spoils of war are now yours for the taking!"
+					'screenType     "Canvas"
+					'hideBack       True
+					'hideExit       True
+					'canvasFunc		'(block nil
 						)
-					'actions	(list
+					'initFunc		'(block (xp)
+						;; calculate an appropriate xp reward
+						;; if the player-commander entered combat earn a bonus
+						(if (eq (objGetData gSource "plyCommitted") True)
+							(setq xp 10)
+							(setq xp 5)
+							)
+						;; adjust for sysLevel
+						(setq xp (multiply xp (sysgetLevel)))
+						;; add it to the total
+						(objIncData gPlayerShip 'bpCommXP xp)
+						)
+					'actions		(list
 						(list
+							'name     	  '("Continue" 'C)
+							'nextScreen		"&dsLoot;"
+							'runFunc    	'(block Nil
+								;; remember that battle has been completed
+								(objIncData gPlayerShip 'bpVictories 1)
+								(objSetData gSource "BattleDone" True)
+								(setq gPrevScreen (dsf_ScreenTypeToUNID 'itemPickerStation))
+								(setq gPrevPane "Default")
+								)
 							)
 						)
 					)
 			;; Combat not successful
 			(eq screen "BattleLose")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
-					'hideBack       Nil
-					'hideExit       Nil
-					'initFunc	'(block Nil
+					'screenName     "Failure!!!"
+					'paneDesc       (cat "You have been denied entry to "(objGetName gSource 4)"!")
+					'screenType     "Canvas"
+					'hideBack       True
+					'hideExit       True
+					'canvasFunc		'(block nil
 						)
-					'actions	(list
+					'initFunc		'(block (xp)
+						;; calculate an appropriate xp reward
+						;; if the player-commander entered combat earn a bonus
+						(if (eq (objGetData gSource "plyCommitted") True)
+							(setq xp 5)
+							(setq xp 1)
+							)
+						;; adjust for sysLevel
+						(setq xp (multiply xp (sysgetLevel)))
+						;; add it to the total
+						(objIncData gPlayerShip 'bpCommXP xp)
+						)
+					'actions		(list
 						(list
+							'name       '("Launch a new offensive" 'L)
+							'runFunc    '(bp_ScreenData 'TacticMain)
+							)
+						(list
+							'name       '("Undock" 'U)
+							'runFunc    '(block Nil
+								(objIncData gPlayerShip 'bpFailures 1)
+								(scrExitdock gScreen)
+								)
 							)
 						)
 					)
 			;; Player killed in combat
 			(eq screen "BattlePK")
 				(list
-					'screenName     (cat (objGetName gSource) "'s cargobay.")
-					'hideBack       Nil
-					'hideExit       Nil
+					'screenName     "You were killed in combat!"
+					'paneDesc       (cat "Your forces were gunned down and you along with them!")
+					'screenType     "Canvas"
+					'hideBack       True
+					'hideExit       True
+					'canvasFunc		'(block nil
+						)
 					'initFunc	'(block Nil
 						)
 					'actions	(list
 						(list
+							'name       '("Continue" 'C)
+							'runFunc    '(block Nil
+								(plyDestroyed gPlayer "was killed by in a boarding attempt")
+								(scrExitdock gScreen)
+								)
 							)
 						)
 					)
@@ -955,24 +1098,24 @@
 					'hideBack       Nil
 					'hideExit       Nil
 					'canvasFunc	'(block (str def hp tac lvl xp xpnext points c3i stl psi hack heal dem como comr win lose)
-							(setq str (objGetData gSource "plyStrength"))
-							(setq def (objGetData gSource "plyDefense"))
-							(setq hp (objGetData gSource "plyHealth"))
-							(setq tac (dsf_GetData 'Tactics))
-							(setq lvl (dsf_GetData 'bpCommLevel))
-							(setq xp (dsf_GetData 'bpCommXP))
+							(setq str (objGetData gPlayerShip 'Strength))
+							(setq def (objGetData gPlayerShip 'Defense))
+							(setq hp (objGetData gPlayerShip 'HP))
+							(setq tac (objGetData gPlayerShip 'Tactics))
+							(setq lvl (objGetData gPlayerShip 'bpCommLevel))
+							(setq xp (objGetData gPlayerShip 'bpCommXP))
 							(setq xpnext (bp_ComputeXPNeeded))
-							(setq points (dsf_GetData 'bpCommPoints))
-							(setq c3i (objGetData gSource "plyC3I"))
-							(setq stl (objGetData gSource "plyStealth"))
-							(setq psi (objGetData gSource "plyPsionic"))
-							(setq hack (objGetData gSource "plyHacker"))
-							(setq heal (objGetData gSource "plyHealer"))
-							(setq dem (objGetData gSource "plyDemolition"))
-							(setq como (objGetData gSource "plyCommando"))
-							(setq comr (objGetData gSource "plyCommander"))
-							(setq win (dsf_GetData 'bpVictories))
-							(setq lose (dsf_GetData 'bpFailures))
+							(setq points (objGetData gPlayerShip 'bpCommPoints))
+							(setq c3i (objGetData gPlayerShip 'C3I))
+							(setq stl (objGetData gPlayerShip 'Stealth))
+							(setq psi (objGetData gPlayerShip 'Psionic))
+							(setq hack (objGetData gPlayerShip 'Hacker))
+							(setq heal (objGetData gPlayerShip 'Healer))
+							(setq dem (objGetData gPlayerShip 'Demolition))
+							(setq como (objGetData gPlayerShip 'Commando))
+							(setq comr (objGetData gPlayerShip 'Commander))
+							(setq win (objGetData gPlayerShip 'bpVictories))
+							(setq lose (objGetData gPlayerShip 'bpFailures))
 							
 							(cnvDrawRect 0 0 600 400 '(8 8 8))
 							
@@ -1002,7 +1145,7 @@
 						(list
 							'name       '("Spend skill points" 'S)
 							'runFunc    '(bp_ScreenData "CommanderUpgrade")
-							'hideFunc	'(if (gr (dsf_GetData 'bpCommPoints) 0) True Nil)
+							'hideFunc	'(if (gr (objGetData gPlayerShip 'bpCommPoints) 0) Nil True)
 							)
 						(list
 							'name       '("View personal inventory" 'V)
@@ -1013,6 +1156,7 @@
 							'hideFunc	'(eq (objGetData gSource "plyCommitted") True)
 							'runFunc    '(block Nil
 								(objSetData gSource "plyCommitted" True)
+								(objSetData gplayerShip "plyCommitted" True)
 								(bp_ScreenData "preBattleSummary")
 								)
 							)
@@ -1021,6 +1165,7 @@
 							'hideFunc	'(eq (objGetData gSource "plyCommitted") Nil)
 							'runFunc    '(block Nil
 								(objSetData gSource "plyCommitted" Nil)
+								(objSetData gPlayerShip "plyCommitted" Nil)
 								(bp_ScreenData "preBattleSummary")
 								)
 							)
@@ -1031,7 +1176,9 @@
 			(eq screen "CommanderUpgrade")
 				(list
 					'screenName     "Character upgrade screen"
+					'paneDesc       '("Decide how you will evolve.\n\nFree points: (objgetData gPlayerShip 'bpCommPoints)")
 					'screenType     "CustomPicker"
+					'noSave			True
 					'hideBack       Nil
 					'hideExit       True
 					'initFunc	'(block Nil
@@ -1039,6 +1186,191 @@
 					'customPicker   (list
 						;;;; Skill upgrade
 						(list
+							'title      (cat "Strength: "(objGetData gPlayerShip "Strength"))
+							'subtitle   "A measure of how much damage you deal to your enemies."
+							'paneDesc   '("\n\n1 upgrade point will increase strengh by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'Strength 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plyStength (objGetData gPlayerShip 'Strength))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Defense: "(objGetData gPlayerShip "Defense"))
+							'subtitle   "Your ability to avoid being damaged."
+							'paneDesc   '("\n\n1 upgrade point will increase defense by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'Defense 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plyDefense (objGetData gPlayerShip 'Defense))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Health Points: "(objGetData gPlayerShip "HP"))
+							'subtitle   "A measure of how much damage you deal to your enemies."
+							'paneDesc   '("\n\n1 upgrade point will increase health by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'Hp 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plyHP (objGetData gPlayerShip 'HP))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "C3I: "(objGetData gPlayerShip "C3I"))
+							'subtitle   "Your ability to glean information and predict the enemy tactics."
+							'paneDesc   '("\n\n1 upgrade point will increase C3I by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'C3I 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plyC3I (objGetData gPlayerShip 'C3I))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Stealth: "(objGetData gPlayerShip "Stealth"))
+							'subtitle   "Your skill at remaining hidden from detection."
+							'paneDesc   '("\n\n1 upgrade point will increase stealth by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'stealth 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plystealth (objGetData gPlayerShip 'stealth))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Psionic: "(objGetData gPlayerShip "Psionic"))
+							'subtitle   "Look through your enemy's eyes and read their thoughts."
+							'paneDesc   '("\n\n1 upgrade point will increase psionics by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'psionic 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plypsionic (objGetData gPlayerShip 'psionic))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Hacker: "(objGetData gPlayerShip "Hacker"))
+							'subtitle   "A master of the virtual dimensions is a master of them all."
+							'paneDesc   '("\n\n1 upgrade point will increase hacker by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'hacker 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plyhacker (objGetData gPlayerShip 'hacker))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Healer: "(objGetData gPlayerShip "Healer"))
+							'subtitle   "Keeping your troops in the fight."
+							'paneDesc   '("\n\n1 upgrade point will increase healer by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'healer 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plyhealer (objGetData gPlayerShip 'healer))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Demolition: "(objGetData gPlayerShip "Demolition"))
+							'subtitle   "There's a right way to use a bomb and a better way."
+							'paneDesc   '("\n\n1 upgrade point will increase demolitions by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'demolition 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plydemolition (objGetData gPlayerShip 'demolition))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Commando: "(objGetData gPlayerShip "commando"))
+							'subtitle   "Knowing how to use all your skills at the appropriate time and make the most out of them."
+							'paneDesc   '("\n\n1 upgrade point will increase commando by 3." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'commando 3)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plycommando (objGetData gPlayerShip 'commando))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
+							)
+						(list
+							'title      (cat "Commander: "(objGetData gPlayerShip "commander"))
+							'subtitle   "A good leader knows how to use his troops, like the pieces on a chess board, they all have their roll."
+							'paneDesc   '("\n\n1 upgrade point will increase the number of troops you can take into battle by 5." '+)
+							'actions    (list
+								(list
+									'name       '("Select" 'S)
+									'hideFunc	(leq (objGetData gPlayerShip 'bpCommPoints) 0)
+									'runFunc    '(block Nil
+										(objIncData gPlayerShip 'commander 5)
+										(objIncData gPlayerShip 'bpCommPoints -1)
+										(objSetData gSource 'plycommander (objGetData gPlayerShip 'commander))
+										(bp_ScreenData "CommanderUpgrade")
+										)
+									)
+								)
 							)
 						)
 					)
@@ -1054,49 +1386,65 @@
 			(eq screen "CommanderEquip")
 				(list
 					'screenName     "Your personal armory"
-					'screenType     "ItemPickerPlayer"
+					'screenType     "customPicker"
 					'itemFilter     "* +Commander;"
+					'noSave			True
 					'hideBack       Nil
 					'hideExit       True
 					'actions	(list
 						(list
 							'name       '("Equip this item" 'E)
-							'runFunc    '(block Nil
-								(itmSetGlobalData (scrGetItem gScreen) "Equipped" True)
-								(objIncData gSource "plyStrength" (itmGetStaticData (scrGetItem gScreen) 'strength))
-								(objIncData gSource "plyDefense" (itmGetStaticData (scrGetItem gScreen) 'defense))
-								(objIncData gSource "plyHealth" (itmGetStaticData (scrGetItem gScreen) 'Health))
-								(objIncData gSource "plyC3I" (itmGetStaticData (scrGetItem gScreen) 'C3I))
-								(objIncData gSource "plyStealth" (itmGetStaticData (scrGetItem gScreen) 'stealth))
-								(objIncData gSource "plyPsionics" (itmGetStaticData (scrGetItem gScreen) 'Psionics))
-								(objIncData gSource "plyHacker" (itmGetStaticData (scrGetItem gScreen) 'Hacker))
-								(objIncData gSource "plyHealer" (itmGetStaticData (scrGetItem gScreen) 'Healer))
-								(objIncData gSource "plyDemolitions" (itmGetStaticData (scrGetItem gScreen) 'Demolitions))
-								(objIncData gSource "plyCommando" (itmGetStaticData (scrGetItem gScreen) 'Commando))
-								(objIncData gSource "plyCommander" (itmGetStaticData (scrGetItem gScreen) 'Commander))
+							'hideFunc	'(eq (itmGetData (dsf_GetListEntryData 'item) "Equipped") True)
+							'runFunc    '(block (itm)
+								(setq itm (dsf_GetListEntryData 'item))
+								(objSetItemData gPlayerShip itm "Equipped" True 1)
+								(objIncData gSource "plyStrength" (itmGetStaticData itm 'strength))
+								(objIncData gSource "plyDefense" (itmGetStaticData itm 'defense))
+								(objIncData gSource "plyHealth" (itmGetStaticData itm 'Health))
+								(objIncData gSource "plyC3I" (itmGetStaticData itm 'C3I))
+								(objIncData gSource "plyStealth" (itmGetStaticData itm 'stealth))
+								(objIncData gSource "plyPsionics" (itmGetStaticData itm 'Psionics))
+								(objIncData gSource "plyHacker" (itmGetStaticData itm 'Hacker))
+								(objIncData gSource "plyHealer" (itmGetStaticData itm 'Healer))
+								(objIncData gSource "plyDemolitions" (itmGetStaticData itm 'Demolitions))
+								(objIncData gSource "plyCommando" (itmGetStaticData itm 'Commando))
+								(objIncData gSource "plyCommander" (itmGetStaticData itm 'Commander))
 								(bp_ScreenData "CommanderEquip")
 								)
-							'hideFunc	'(not (itmGetGlobalData (scrGetItem gScreen) "Equipped"))
 							)
 						(list
 							'name       '("Unequip this item" 'U)
+							'hideFunc	'(eq (itmGetData (dsf_GetListEntryData 'item) "Equipped") Nil)
 							'runFunc    '(block Nil
-								(itmSetGlobalData (scrGetItem gScreen) "Equipped" Nil)
-								(objIncData gSource "plyStrength" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'strength)))
-								(objIncData gSource "plyDefense" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'defense)))
-								(objIncData gSource "plyHealth" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'Health)))
-								(objIncData gSource "plyC3I" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'C3I)))
-								(objIncData gSource "plyStealth" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'stealth)))
-								(objIncData gSource "plyPsionics" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'Psionics)))
-								(objIncData gSource "plyHacker" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'Hacker)))
-								(objIncData gSource "plyHealer" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'Healer)))
-								(objIncData gSource "plyDemolitions" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'Demolitions)))
-								(objIncData gSource "plyCommando" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'Commando)))
-								(objIncData gSource "plyCommander" (multiply -1 (itmGetStaticData (scrGetItem gScreen) 'Commander)))
+								(objSetItemData gPlayerShip (dsf_GetListEntryData 'item) "Equipped" Nil 1)
+								(objIncData gSource "plyStrength" (multiply -1 (itmGetStaticData itm 'strength)))
+								(objIncData gSource "plyDefense" (multiply -1 (itmGetStaticData itm 'defense)))
+								(objIncData gSource "plyHealth" (multiply -1 (itmGetStaticData itm 'Health)))
+								(objIncData gSource "plyC3I" (multiply -1 (itmGetStaticData itm 'C3I)))
+								(objIncData gSource "plyStealth" (multiply -1 (itmGetStaticData itm 'stealth)))
+								(objIncData gSource "plyPsionics" (multiply -1 (itmGetStaticData itm 'Psionics)))
+								(objIncData gSource "plyHacker" (multiply -1 (itmGetStaticData itm 'Hacker)))
+								(objIncData gSource "plyHealer" (multiply -1 (itmGetStaticData itm 'Healer)))
+								(objIncData gSource "plyDemolitions" (multiply -1 (itmGetStaticData itm 'Demolitions)))
+								(objIncData gSource "plyCommando" (multiply -1 (itmGetStaticData itm 'Commando)))
+								(objIncData gSource "plyCommander" (multiply -1 (itmGetStaticData itm 'Commander)))
 								(bp_ScreenData "CommanderEquip")
 								)
-							'hideFunc	'(itmGetGlobalData (scrGetItem gScreen) "Equipped")
 							)
+						)
+					'customPicker	(block (displayList)
+						(setq displayList (list))
+						(objEnumItems gPlayerShip "* +Commander;" itm (block Nil
+							(lnkAppend displayList
+								(list
+									'title      (cat (itmGetName itm 8) (if (itmGetData itm "Equipped") " - Equipped" ""))
+									'image		(itmGetImageDesc itm)
+									'subtitle   (typGetDataField (itmGetunid itm) 'description)
+									'item		itm
+									)
+								)
+							))
+							displayList
 						)
 					)
 					

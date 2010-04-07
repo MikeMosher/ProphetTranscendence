@@ -66,11 +66,13 @@
 
 				(objSetData gPlayerShip "Tactics" 	1)
 				(objSetData gPlayerShip "bpCommXP" 	0)
-				(objSetData gPlayerShip "bpCommLevel" 1)
-				(objSetData gPlayerShip "bpCommPoints" 5)
+				(objSetData gPlayerShip 'bpCommLevel 1)
+				(objSetData gPlayerShip 'bpCommPoints 5)
 				
 				(objSetData gPlayerShip "bpVictories" 0)
 				(objSetData gPlayerShip "bpFailures" 0)
+				
+				(objSetData gPlayership "plyCommitted" Nil)
 				
 				;; mark that we've been run
 				(objSetData gPlayerShip "bpInitialized" True)
@@ -82,11 +84,9 @@
 	;; return the new level, else returns nil
 	(setq bp_ComputeCommanderLevel (lambda Nil
 		(block (xp oldLvl newLvl)
-			(setq xp (dsf_getData 'bpCommXP))
-			(setq oldLvl (dsf_GetData 'bpCommLevel))
+			(setq xp (objGetData gPlayerShip 'bpCommXP))
+			(setq oldLvl (objGetData gPlayerShip 'bpCommLevel))
 			(switch
-				(leq xp 0)
-					(setq newLvl 1)
 				(leq xp 100)
 					(setq newLvl 2)
 				(leq xp 250)
@@ -116,25 +116,26 @@
 	;; if max level returns 0
 	(setq bp_ComputeXPNeeded (lambda Nil
 		(block (xp lvl xpNeed)
-			(setq xp (dsf_GetData 'bpCommXP))
-			(setq lvl (dsf_GetData 'bpCommLvl))
+			(setq xpNeed 0)
+			(setq xp (objGetData gPlayerShip 'bpCommXP))
+			(setq lvl (objGetData gPlayerShip 'bpCommLevel))
 			(switch
 				(eq lvl 1)
-					(setq xpNeed (subtract xp 100))
+					(setq xpNeed (subtract 100 xp))
 				(eq lvl 2)
-					(setq xpNeed (subtract xp 250))
+					(setq xpNeed (subtract 250 xp))
 				(eq lvl 3)
-					(setq xpNeed (subtract xp 500))
+					(setq xpNeed (subtract 500 xp))
 				(eq lvl 4)
-					(setq xpNeed (subtract xp 1000))
+					(setq xpNeed (subtract 1000 xp))
 				(eq lvl 5)
-					(setq xpNeed (subtract xp 2500))
+					(setq xpNeed (subtract 2500 xp))
 				(eq lvl 6)
-					(setq xpNeed (subtract xp 5000))
+					(setq xpNeed (subtract 5000 xp))
 				(eq lvl 7)
-					(setq xpNeed (subtract xp 10000))
+					(setq xpNeed (subtract 10000 xp))
 				(eq lvl 8)
-					(setq xpNeed (subtract xp 25000))
+					(setq xpNeed (subtract 25000 xp))
 				0
 			)
 			xpNeed
@@ -169,10 +170,29 @@
 	;; Set up an enemy force to fight with
 	(setq bp_InitializeEnemy (lambda Nil
 		;; check if we've already run
-		(if True ;; (not (objGetData gSource "initEnemyDone"))
-			(block (sov lvl)
+		(if (not (objGetData gSource "initEnemyDone"))
+			(block (sov lvl imageData)
 				(setq sov (sovHack (objGetSovereign gSource)))
 				(setq lvl (sysGetLevel))
+				;; we use the image of the station to determine a rough
+				;; estimate for how much resistance is present
+				(setq imageData (item (objGetImageDesc gSource) 3))
+				(switch
+					(leq imageData 40)
+						(setq imageData '(1 2))
+					(leq imageData 75)
+						(setq imageData '(1 3))
+					(leq imageData 99)
+						(setq imageData '(2 5))
+					(leq imageData 115)
+						(setq imageData '(5 10))
+					(leq imageData 130)
+						(setq imageData '(10 25))
+					(leq imageData 250)
+						(setq imageData '(20 50))
+					(geq imageData 251)
+						(setq imageData '(50 100))
+					)
 				(objSetData gSource "Name" (bp_GetEnemyData sov 'name))
 				(objSetData gSource "strength" (bp_GetEnemyData sov 'Strength))
 				(objSetData gSource "defense" (bp_GetEnemyData sov 'Defense))
@@ -184,7 +204,13 @@
 				(objSetData gSource "healer" (bp_GetEnemyData sov 'Healer))
 				(objSetData gSource "demolition" (bp_GetEnemyData sov 'Demolition))
 				(objSetData gSource "commando" (bp_GetEnemyData sov 'Commando))
-				(objSetData gSource "enemytroopCount" (bp_GetEnemyData sov 'Troops))
+				;; ships have fewer troops then stations so deal with them separately
+				(objSetData gSource "enemytroopCount" 
+					(if (objIsShip gSource)
+						(add (bp_GetEnemyData sov 'Troops) (random 0 (item imageData 0)))
+						(add (bp_GetEnemyData sov 'Troops) (random (item imageData 0) (item imageData 1)))
+						)
+					)
 				;; mark that we've been run
 				(objSetData gSource "initEnemyDone" True)
 				)
@@ -198,7 +224,7 @@
 	;; this function collects basic player data
 	(setq bp_InitializeBattle (lambda Nil
 		;; check if we've already run
-		(if True ;; (not (objGetData gSource "initPlayerDone"))
+		(if (not (objGetData gSource "initPlayerDone"))
 			(block Nil
 				;; collect the data from the player and place it on the spaceObj
 				;; we do this because these values will fluctuate and we want to 
@@ -226,8 +252,11 @@
 				(objSetData gSource "tacHealer" 0)
 				(objSetData gSource "tacDemolition" 0)
 				(objSetData gSource "tacCommando" 0)
-				;; mark the player-commander as not battling 
-				(objSetData gSource "plyCommitted" Nil)
+				;; check the commander's status
+				(if (eq (objGetData gPlayership "plyCommitted") True)
+					(objSetData gSource "plycommitted" True)
+					(objSetData gSource "plyCommitted" Nil)
+					)
 				;; mark that we've been run
 				(objSetData gSource "initPlayerDone" True)
 				)
@@ -238,14 +267,16 @@
 	;; it determines if there will be a battle or not
 	;; TODO: currently set up to make 100% of wrecks have battles for testing purposes
 	(setq intBoardingOnInit (lambda (prevPane)
-		(if True ;; (leq (objGetDestiny gSource) (multiply (sysGetLevel) 36))
-			(dsf_ShowDockScreen (bp_ScreenData 'Warning))
-			(scrShowPane gScreen prevPane)
-			)
+		(switch
+			(eq (objGetData gSource "BattleDone") True)
+				Nil ;; continue to normal screen
+			(and (leq (objGetDestiny gSource) (multiply (sysGetLevel) 36)))
+				(dsf_ShowDockScreen (bp_ScreenData 'Warning))
+			Nil ;; we don't qualify for battle, continue normally
+				)
 		))
 		
 	;; this function turns sov data into something I can use as a static data element
-	;; this took me about 5 hours fussing with it trying different things....
 	(setq sovHack (lambda (sov)
 		(switch
 			(eq sov 4097)
