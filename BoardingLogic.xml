@@ -1,16 +1,367 @@
 <?xml version="1.0" ?>
 <!DOCTYPE TranscendenceExtension
 [
-	<!ENTITY BP_Logic				"0xD5125100">
+	<!ENTITY BP_Logic					"0xD5125502">
+	<!ENTITY bp_FactionCalculator		"0xD5125506">
+
+	<!ENTITY bp_itPlasmidGunner			"0xD5125601">
+	<!ENTITY bp_itMonoFilamentBlade		"0xD5125651">
 ]>
 
 <TranscendenceExtension UNID="&BP_Logic;" version="1.0">
+
+<Globals>
+(block Nil
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;		Debug functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;; We'll start with some debug helpers, I have a feeling we'll need them
+	;; borrowed from alterecco's DSF mod ;P
+
+	;; This variable controls if we are running in debug or not.
+	(setq bp_Debug True)
+	;; this is a convenient way to force all debug calls from
+	;; log to screen
+	(setq bp_DebugToScreen Nil)
+	;; DoDebug will print debug information if dsf_Debug
+	;; is set. It takes a string which will be output, and
+	;; if screen is True, it will be sent to the screen.
+	;; Otherwise it will go into the log
+	(setq bp_DoDebug (lambda (string screen)
+		(if bp_Debug
+			(if (or screen bp_DebugToScreen)
+				(dbgOutput string)
+				(dbgLog string)
+			)
+		)
+	))
+	(setq battleOn (lambda Nil
+		(block Nil
+			(objAddItem gPlayerShip (itmCreate &bp_itPlasmidGunner; 1) 10)
+			(objAddItem gPlayerShip (itmCreate &bp_itMonoFilamentBlade; 1))
+		)
+	))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;		Manipulating Player Data
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+	;;;	Player data is kept on the playership because it will change as
+	;;; the game progresses.  I have borrowed the dsf helper funcs to 
+	;;; minimize redundancy.
+
+	;; This function sets everything up and should only be run once
+	(setq bp_InitializePlayerData (lambda Nil
+		(if (not (objGetData gPlayerShip "bpInitialized"))
+			(block Nil
+				(objSetData gPlayerShip "Strength"	10)
+				(objSetData gPlayerShip "Defense"	10)
+				(objSetData gPlayerShip "HP"		10)
+				(objSetData gPlayerShip "C3I"		10)
+				(objSetData gPlayerShip "Stealth"	10)
+				(objSetData gPlayerShip "Psionic"	10)
+				(objSetData gPlayerShip "Hacker"	10)
+				(objSetData gPlayerShip "Healer"	10)
+				(objSetData gPlayerShip "Demolition" 10)
+				(objSetData gPlayerShip "Commando"	10)
+				(objSetData gPlayerShip "Commander"	10)
+
+				(objSetData gPlayerShip "Tactics" 	1)
+				(objSetData gPlayerShip "bpCommXP" 	0)
+				(objSetData gPlayerShip 'bpCommLevel 1)
+				(objSetData gPlayerShip 'bpCommPoints 5)
+				
+				(objSetData gPlayerShip "bpVictories" 0)
+				(objSetData gPlayerShip "bpFailures" 0)
+				
+				(objSetData gPlayership "plyCommitted" Nil)
+				
+				;; mark that we've been run
+				(objSetData gPlayerShip "bpInitialized" True)
+			)
+		)
+	))
+
+	;; If the player has enough xp to gain a level
+	;; return the new level, else returns nil
+	(setq bp_ComputeCommanderLevel (lambda Nil
+		(block (xp oldLvl newLvl)
+			(setq xp (objGetData gPlayerShip 'bpCommXP))
+			(setq oldLvl (objGetData gPlayerShip 'bpCommLevel))
+			(switch
+				(leq xp 100)
+					(setq newLvl 2)
+				(leq xp 250)
+					(setq newLvl 3)
+				(leq xp 500)
+					(setq newLvl 4)
+				(leq xp 1000)
+					(setq newLvl 5)
+				(leq xp 2500)
+					(setq newLvl 6)
+				(leq xp 5000)
+					(setq newLvl 7)
+				(leq xp 10000)
+					(setq newLvl 8)
+				(leq xp 25000)
+					(setq newLvl 9)
+				(setq newLvl 10)
+			)
+			(if (gr newLvl oldLvl)
+				newLvl
+				Nil
+			)
+		)
+	))
+	
+	;; compute how much xp is needed to achieve the next level and return it
+	;; if max level returns 0
+	(setq bp_ComputeXPNeeded (lambda Nil
+		(block (xp lvl xpNeed)
+			(setq xpNeed 0)
+			(setq xp (objGetData gPlayerShip 'bpCommXP))
+			(setq lvl (objGetData gPlayerShip 'bpCommLevel))
+			(switch
+				(eq lvl 1)
+					(setq xpNeed (subtract 100 xp))
+				(eq lvl 2)
+					(setq xpNeed (subtract 250 xp))
+				(eq lvl 3)
+					(setq xpNeed (subtract 500 xp))
+				(eq lvl 4)
+					(setq xpNeed (subtract 1000 xp))
+				(eq lvl 5)
+					(setq xpNeed (subtract 2500 xp))
+				(eq lvl 6)
+					(setq xpNeed (subtract 5000 xp))
+				(eq lvl 7)
+					(setq xpNeed (subtract 10000 xp))
+				(eq lvl 8)
+					(setq xpNeed (subtract 25000 xp))
+				0
+			)
+			xpNeed
+		)
+	))
+			
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;		Manipulating Enemy Data
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Enemy data is kept in static data because it remains the same 
+;;; throughout the game and is modified dynamically to suit our needs
+
+	(setq bp_GetEnemyData (lambda (sov stat)
+		(block (sovlist data Found)
+			(setq sovlist (itmGetStaticData (itmCreate &bp_FactionCalculator; 0) sov))
+			(setq Found Nil)
+			(enumwhile sovlist (not Found) thisEntry (block Nil
+				(if (eq (item thisEntry 0) stat)
+					(block nil
+						(if (eq stat 'name)
+							(setq data (item thisEntry 1))
+							(setq data (random (item thisEntry 1) (item thisEntry 2)))
+							)
+						(setq Found True)
+					)
+				)
+			))
+		data
+		)
+	))
+	
+	;; Set up an enemy force to fight with
+	(setq bp_InitializeEnemy (lambda Nil
+		;; check if we've already run
+		(if (not (objGetData gSource "initEnemyDone"))
+			(block (sov lvl imageData)
+				(setq sov (sovHack (objGetSovereign gSource)))
+				(setq lvl (sysGetLevel))
+				;; we use the image of the station to determine a rough
+				;; estimate for how much resistance is present
+				(setq imageData (item (objGetImageDesc gSource) 3))
+				(switch
+					(leq imageData 40)
+						(setq imageData '(1 2))
+					(leq imageData 75)
+						(setq imageData '(1 3))
+					(leq imageData 99)
+						(setq imageData '(2 5))
+					(leq imageData 115)
+						(setq imageData '(5 10))
+					(leq imageData 130)
+						(setq imageData '(10 25))
+					(leq imageData 250)
+						(setq imageData '(20 50))
+					(geq imageData 251)
+						(setq imageData '(50 100))
+					)
+				(objSetData gSource "Name" (bp_GetEnemyData sov 'name))
+				(objSetData gSource "strength" (bp_GetEnemyData sov 'Strength))
+				(objSetData gSource "defense" (bp_GetEnemyData sov 'Defense))
+				(objSetData gSource "hp" (bp_GetEnemyData sov 'HP))
+				(objSetData gSource "c3i" (bp_GetEnemyData sov 'C3I))
+				(objSetData gSource "stealth" (bp_GetEnemyData sov 'Stealth))
+				(objSetData gSource "psionic" (bp_GetEnemyData sov 'Psionic))
+				(objSetData gSource "hacker" (bp_GetEnemyData sov 'Hacker))
+				(objSetData gSource "healer" (bp_GetEnemyData sov 'Healer))
+				(objSetData gSource "demolition" (bp_GetEnemyData sov 'Demolition))
+				(objSetData gSource "commando" (bp_GetEnemyData sov 'Commando))
+				;; ships have fewer troops then stations so deal with them separately
+				(objSetData gSource "enemytroopCount" 
+					(if (objIsShip gSource)
+						(add (bp_GetEnemyData sov 'Troops) (random 0 (item imageData 0)))
+						(add (bp_GetEnemyData sov 'Troops) (random (item imageData 0) (item imageData 1)))
+						)
+					)
+				;; mark that we've been run
+				(objSetData gSource "initEnemyDone" True)
+				)
+			)
+	))
+			
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;		Core mechanics and logic
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	
+	;; this function collects basic player data
+	(setq bp_InitializeBattle (lambda Nil
+		;; check if we've already run
+		(if (not (objGetData gSource "initPlayerDone"))
+			(block Nil
+				;; collect the data from the player and place it on the spaceObj
+				;; we do this because these values will fluctuate and we want to 
+				;; preserve the 'base' values stored on the playership
+				(objSetData gSource "plyStrength" (objGetData gPlayerShip "Strength"))
+				(objSetData gSource "plyDefense" (objGetData gPlayerShip "Defense"))
+				(objSetData gSource "plyHP" (objGetData gPlayerShip "HP"))
+				(objSetData gSource "plyC3I" (objGetData gPlayerShip "C3I"))
+				(objSetData gSource "plyStealth" (objGetData gPlayerShip "Stealth"))
+				(objSetData gSource "plyPsionic" (objGetData gPlayerShip "Psionic"))
+				(objSetData gSource "plyHacker" (objGetData gPlayerShip "Hacker"))
+				(objSetData gSource "plyHealer" (objGetData gPlayerShip "Healer"))
+				(objSetData gSource "plyDemolition" (objGetData gPlayerShip "Demolition"))
+				(objSetData gSource "plyCommando" (objGetData gPlayerShip "Commando"))
+				(objSetData gSource "plyCommander" (objGetData gPlayerShip "Commander"))
+
+				;; initialize some default tactic vars
+				(objSetData gSource "tacStrength" 0)
+				(objSetData gSource "tacDefense" 0)
+				(objSetData gSource "tacHP" 0)
+				(objSetData gSource "tacC3I" 0)
+				(objSetData gSource "tacStealth" 0)
+				(objSetData gSource "tacPsionic" 0)
+				(objSetData gSource "tacHacker" 0)
+				(objSetData gSource "tacHealer" 0)
+				(objSetData gSource "tacDemolition" 0)
+				(objSetData gSource "tacCommando" 0)
+				;; check the commander's status
+				(if (eq (objGetData gPlayership "plyCommitted") True)
+					(objSetData gSource "plycommitted" True)
+					(objSetData gSource "plyCommitted" Nil)
+					)
+				;; mark that we've been run
+				(objSetData gSource "initPlayerDone" True)
+				)
+		)
+	))
+	
+	;; init function for the abandoned station dockscreens
+	;; it determines if there will be a battle or not
+	;; TODO: currently set up to make 100% of wrecks have battles for testing purposes
+	(setq intBoardingOnInit (lambda (prevPane)
+		(switch
+			(eq (objGetData gSource "BattleDone") True)
+				Nil ;; continue to normal screen
+			(and (leq (objGetDestiny gSource) (multiply (sysGetLevel) 36)))
+				(dsf_ShowDockScreen (bp_ScreenData 'Warning))
+			Nil ;; we don't qualify for battle, continue normally
+				)
+		))
+		
+	;; this function turns sov data into something I can use as a static data element
+	(setq sovHack (lambda (sov)
+		(switch
+			(eq sov 4097)
+				'Independent
+			(eq sov 4098)
+				'Commonwealth
+			(or (eq sov 4099) (eq sov 4100))
+				'IndMerch
+			(eq sov 4101)
+				'Charon
+			(eq sov 4102)
+				'Outlaws
+			(eq sov 4103)
+				'Ares1
+			(eq sov 4104)
+				'anarachists
+			(eq sov 4105)
+				'settlers
+			(eq sov 4106)
+				'cult
+			(eq sov 4107)
+				'rogue
+			(eq sov 4108)
+				'sung
+			(eq sov 4109)
+				'slaves
+			(eq sov 4110)
+				'desChaos
+			(or (eq sov 4111) (eq sov 4115))
+				'auton
+			(eq sov 4112)
+				'desOrder
+			(eq sov 4113)
+				'corporate
+			(eq sov 4114)
+				'BM
+			(or (eq sov 4116) (eq sov 4118))
+				'ferian
+			(eq sov 4117)
+				'ringers
+			(or (eq sov 1314817) (eq sov -591790014) (eq sov -591790013) (eq sov -591790012))
+				'gladiator
+			(eq sov 1708033)
+				'antarctica
+			(eq sov 1708034)
+				'CWFleet
+			(eq sov 1839105)
+				'iocrym
+			(eq sov 1839106)
+				'Ares2
+			(eq sov 1839107)
+				'AI
+			(eq sov 2101249)
+				'domina
+			(eq sov 134283333)
+				'heliotropes
+			(eq sov 134348880)
+				'Centauri
+			(eq sov 134348932)
+				'kobol
+			(eq sov 134349003)
+				'luminous
+			(eq sov 134349058)
+				'huari
+			(eq sov 134349120)
+				'dwarg
+			(eq sov 134349133)
+				'zoanthropes
+			(eq sov 134414409)
+				'marauders
+			(eq sov 134414594)
+				'himal
+			(eq sov 134414656)
+				'urak
+			(eq sov 134480195)
+				'gaian
+			'misc
+			)
+		))
+)
+</Globals>
+
 <!---
-;; currently this is just a bin of random thoughts and ideas
-;; it will eventuall contain all the core mechanics and functions
-;; for the mod in easy-to-manage helper functions.
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;							TACTICS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -118,30 +469,6 @@ The commander will also posses the SKILL attribute a Combat Level and Combat XP.
 	A successful battle will award 10XP, a failed battle will award 2XP
 	and the levels will be determined as follows:
 	
-(switch
-	(geq ComXP 25000) 	; this represents 2500 succesfull battles
-		10	; level 10
-	(leq ComXP 10000)
-		9	; level 9
-	(leq ComXP 5000)
-		8	; level 8
-	(leq ComXP 2500)
-		7	; level 7
-	(leq ComXP 1000)
-		6	; level 6
-	(leq ComXP 500)
-		5	; level 5
-	(leq ComXP 250)
-		4	; level 4
-	(leq ComXP 100)
-		3	; level 3
-	(leq ComXP 50)
-		2	; level 2
-	(leq ComXP 25) 		; this represents 2 success and 3 failures
-		1	; level 1
-	(leq ComXP 0)
-		0	; level 0
-	)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;							ENEMIES

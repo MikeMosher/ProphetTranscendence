@@ -1,11 +1,13 @@
 <?xml version="1.0" ?>
 <!DOCTYPE TranscendenceExtension
 [
-	<!ENTITY BP_Items				"0xD5124000">
+	<!ENTITY BP_Items					"0xD5125503">
+	<!ENTITY bp_FactionCalculator		"0xD5125506">
 	
-	<!ENTITY bp_itPlasmidGunner		"0xD5124001">
+	<!ENTITY bp_itPlasmidGunner			"0xD5125601">
+	<!ENTITY bp_itPlasmidGunnerHeavy	"0xD5125602">
 	
-	<!ENTITY bp_itMonoFilamentBlade	"0xD5124101">
+	<!ENTITY bp_itMonoFilamentBlade		"0xD5125651">
 ]>
 
 <TranscendenceExtension UNID="&BP_Items;" version="1.0">
@@ -14,79 +16,819 @@
 ;;;					Troop Items
 ;;;	The gears and cogs that battle is made of!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    <ItemType UNID="&bp_itPlasmidGunner;"
-        name            = "Plasmid Gunner"
-        level           = "1"
-        value           = "350"
-        mass            = "50"
-        frequency       = "uncommon"
-        numberAppearing = "1d3"
-        modifiers       = "TroopUnit; MinorItem;"
 
-        description     = "Plasmid Gunners are the most common simple boarding bot."
-        sortname        = "troop, plasmid gunner,"
+<!--- 	Plasmid gunner, light	--->
+
+    <ItemType UNID="&bp_itPlasmidGunner;"
+        name=			"Plasmid Gunner"
+        level=			"1"
+        value=			"350"
+        mass=			"50"
+        frequency=		"common"
+        numberAppearing="1d5+5"
+        modifiers=		"TroopUnit; MinorItem;"
+
+        description=	"Plasmid Gunners are the most common simple boarding bot."
+        sortname=		"troop, plasmid gunner,"
         >
-        <Image imageID="&rsItems1;"
-            imageX  = "192"
-            imageY  = "480"
-            imageW  = "96"
-            imageH  = "96"
-        />
+
+		<Image imageID="&rsItems1;" imageX="192" imageY="480" imageWidth="96" imageHeight="96"/>
+
         <StaticData>
-		
-			<Strength>		3	</Strength>
-			<Defense>		1	</Defense>
-			<Health>		2	</Health>
-			
-			<C3I>			1	</C3I>
-			<Stealth>		-2	</Stealth>
-			<Psionics>		-5	</Psionics>
-			<Hacker>		2	</Hacker>
-			<Healer>		-3	</Healer>
-			<Demolitions>	0	</Demolitions>
-			<Commando>		1	<Commando>
-			<Commander>		-1	</Commander>
+			<Strength>5</Strength>
+			<Defense>5</Defense>
+			<Health>8</Health>
+			<C3I>3</C3I>
+			<Stealth>2</Stealth>
+			<Psionics>1</Psionics>
+			<Hacker>5</Hacker>
+			<Healer>1</Healer>
+			<Demolitions>3</Demolitions>
+			<Commando>2</Commando>
+			<Desc>"Plasmid gunners are the most common and simple combat robots available."</Desc>
+        </StaticData>
+    </ItemType>
+
+<!--- 	Plasmid gunner, heavy	--->
+
+    <ItemType UNID="&bp_itPlasmidGunnerHeavy;"
+        name=			"Heavy plasmid gunner"
+        level=			"2"
+        value=			"650"
+        mass=			"75"
+        frequency=		"common"
+        numberAppearing="1d3+3"
+        modifiers=		"TroopUnit; MinorItem;"
+
+        description=	"Heavy plasmid gunners have improved AI and better armaments then the light gunners."
+        sortname=		"troop, plasmid gunner, heavy"
+        >
+
+		<Image imageID="&rsItems1;" imageX="192" imageY="480" imageWidth="96" imageHeight="96"/>
+
+        <StaticData>
+			<Strength>10</Strength>
+			<Defense>12</Defense>
+			<Health>16</Health>
+			<C3I>5</C3I>
+			<Stealth>1</Stealth>
+			<Psionics>1</Psionics>
+			<Hacker>8</Hacker>
+			<Healer>1</Healer>
+			<Demolitions>5</Demolitions>
+			<Commando>4</Commando>
+			<Desc>"Heavy plasmid gunners have improved AI and better armaments then the light gunners."</Desc>
+        </StaticData>
+    </ItemType>
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;				Commander Items
+;;;	These items allow more specialization of the character
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    <ItemType UNID="&bp_itMonoFilamentBlade;"
+        name=			"mono-filament blade"
+        level=			"4"
+        value=			"6350"
+        mass=			"5"
+        frequency=		"rare"
+        numberAppearing="1"
+        modifiers=		"Commander; MajorItem;"
+
+        description=	"This blade is constructed using nano tech to align individual atoms and ensure this blade never dulls."
+        sortname=		"commander, mono-filament blade,"
+        >
+
+		<Image imageID="&rsItems1;" imageX="192" imageY="480" imageWidth="96" imageHeight="96"/>
+
+        <StaticData>
+			<Strength>10</Strength>
+			<Defense>0</Defense>
+			<Health>0</Health>
+			<C3I>0</C3I>
+			<Stealth>0</Stealth>
+			<Psionics>0</Psionics>
+			<Hacker>0</Hacker>
+			<Healer>0</Healer>
+			<Demolitions>0</Demolitions>
+			<Commando>0</Commando>
+			<Commander>0</Commander>
         </StaticData>
     </ItemType>
 	
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;				Commander Items
-;;;	These items allow more specialization of the character
+;;;				Master Sovereign Data Holder
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    <ItemType UNID="&bp_itMonoFilamentBlade;"
-        name            = "mono-filament blade"
-        level           = "4"
-        value           = "6350"
-        mass            = "5"
-        frequency       = "rare"
-        numberAppearing = "1"
-        modifiers       = "Commander; MajorItem;"
+;;; This is our master item, containing all the stats for every sovereign
 
-        description     = "This blade is constructed using nano tech to align individual atoms and ensure this blade never dulls."
-        sortname        = "commander, mono-filament blade,"
-        >
-        <Image imageID="&rsItems1;"
-            imageX  = "192"
-            imageY  = "480"
-            imageW  = "96"
-            imageH  = "96"
-        />
+	<ItemType UNID=	"&bp_FactionCalculator;"
+			name=				"Faction Calculator"
+			virtual=			"true"
+			>
         <StaticData>
-		
-			<Strength>		2	</Strength>
-			<Defense>		0	</Defense>
-			<Health>		0	</Health>
+			;; this data is stored as the UNID of the sovereign for easy 
+			;; compatibility with the logic funcs, although it is hard to read....
+			<independent>
+				(list
+					('name			"Independent")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+				)
+			</independent>
 			
-			<C3I>			0	</C3I>
-			<Stealth>		0	</Stealth>
-			<Psionics>		0	</Psionics>
-			<Hacker>		0	</Hacker>
-			<Healer>		0	</Healer>
-			<Demolitions>	0	</Demolitions>
-			<Commando>		0	<Commando>
-			<Commander>		0	</Commander>
-        </StaticData>
-    </ItemType>
+			<Commonwealth>
+				;; commonwealth
+				(list
+					('name			"Commonwealth")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</Commonwealth>
+			
+			<IndMerch>
+				;; independent merchant
+				(list
+					('name			"Independent merchant")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</IndMerch>
+			
+			<IndMerch>
+				;; independent merchant
+				(list
+					('name			"Independent merchant")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</IndMerch>
+			
+			<Charon>
+				;; charon pirates
+				(list
+					('name			"Charon Pirates")
+					('Strength		2	5)
+					('Defense		1	4)
+					('HP			1	3)
+					('C3I			0	0)
+					('Stealth		0	0)
+					('Psionic		0	0)
+					('Hacker		0	0)
+					('Healer		0	0)
+					('Demolition	0	0)
+					('Commando		0	0)
+					('Troops		1	2)
+					)
+			</Charon>
+			
+			<Outlaws>
+				;; outlaws
+				(list
+					('name			"Outlaws")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</Outlaws>
+			
+			<Ares1>
+				;; ares sect
+				(list
+					('name			"Ares")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</Ares1>
+			
+			<anarachists>
+				;; anarchists
+				(list
+					('name			"Anarchists")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</anarachists>
+			
+			<settlers>
+				;; settlers
+				(list
+					('name			"Settlers")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</settlers>
+			
+			<cult>
+				;; cult
+				(list
+					('name			"Cult")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</cult>
+			
+			<rogue>
+				;; rogue fleet
+				(list
+					('name			"Rogue fleet")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</rogue>
+			
+			<sung>
+				;; sung slavers
+				(list
+					('name			"Sung slavers")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</sung>
+			
+			<slaves>
+				;; slaves of sung
+				(list
+					('name			"Slaves")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</slaves>
+			
+			<desChaos>
+				;; (destructive chaos)
+				(list
+					('name			"Destructive chaos")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</desChaos>
+			
+			<auton>
+				;; auton
+				(list
+					('name			"Auton")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</auton>
+			
+			<desOrder>
+				;; (destructive order)
+				(list
+					('name			"Destructive Order")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</desOrder>
+			
+			<corporate>
+				;; corporate hierarchy
+				(list
+					('name			"Corporate")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</corporate>
+			
+			<BM>
+				;; black market
+				(list
+					('name			"Black Market")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</BM>
+			
+			<ferian>
+				;; ferian miners
+				(list
+					('name			"Ferian miners")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</ferian>
+			
+			<ringers>
+				;; ringers
+				(list
+					('name			"ringers")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</ringers>
+			
+			<gladiator>
+				;; gladiator
+				(list
+					('name			"Gladiator")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</gladiator>
+			
+			<antarctica>
+				;; csc antarctica
+				(list
+					('name			"CSC antarctica")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</antarctica>
+			
+			<CWFleet>
+				;; commonwealth fleet
+				(list
+					('name			"Commonwealth fleet")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</CWFleet>
+			
+			<iocrym>
+				;; iocrym
+				(list
+					('name			"Iocrym")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</iocrym>
+			
+			<Ares2>
+				;; ares sect
+				(list
+					('name			"Ares")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</Ares2>
+			
+			<AI>
+				;; sentinel AI
+				(list
+					('name			"Iocrym sentinel AI")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</AI>
+			
+			<domina>
+				;; domina
+				(list
+					('name			"Domina")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		10	20)
+					)
+			</domina>
+			
+			<heliotropes>
+				;; heliotropes
+				(list
+					('name			"Heliotrope")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</heliotropes>
+			
+			<Centauri>
+				(list
+					('name 			"Centauri warlords")
+					('Strength		2	5)
+					('Defense		3	5)
+					('HP			2	5)
+					('C3I			1	1)
+					('Stealth		1	1)
+					('Psionic		1	1)
+					('Hacker		1	1)
+					('Healer		1	1)
+					('Demolition	1	1)
+					('Commando		1	1)
+					('Troops		1	2)
+				)
+			</Centauri>
+			
+			<kobol>
+				;; kobol warlords
+				(list
+					('name			"Kobol warlords")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</kobol>
+			
+			<luminous>
+				;; luminous drone
+				(list
+					('name			"Luminous drone")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</luminous>
+			
+			<huari>
+				;; huari empire
+				(list
+					('name			"Huari")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</huari>
+			
+			<dwarg>
+				;; dwarg raiders
+				(list
+					('name			"Dwarg")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</dwarg>
+			
+			<zoanthropes>
+				;; zoanthropes
+				(list
+					('name			"Zoanthropes")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</zoanthropes>
+			
+			<marauders>
+				;; marauders
+				(list
+					('name			"Marauders")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</marauders>
+			
+			<himal>
+				;; himal separatists
+				(list
+					('name			"Himal Separatist")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</himal>
+			
+			<urak>
+				;; urak warlords
+				(list
+					('name			"Urak warlord")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</urak>
+			
+			<gaian>
+				;; gaian terraformers
+				(list
+					('name			"Gaian")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</gaian>
+			
+			<Misc>
+				;; for unknown sovereigns (modded)
+				(list
+					('name			"Unknown")
+					('Strength		10	20)
+					('Defense		10	20)
+					('HP			10	20)
+					('C3I			10	20)
+					('Stealth		10	20)
+					('Psionic		10	20)
+					('Hacker		10	20)
+					('Healer		10	20)
+					('Demolition	10	20)
+					('Commando		10	20)
+					('Troops		1	2)
+					)
+			</Misc>
+		</StaticData>
+	</ItemType>
 	
 </TranscendenceExtension>
