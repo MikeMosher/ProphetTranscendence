@@ -2,16 +2,43 @@
 <!DOCTYPE TranscendenceExtension
 [
 	<!ENTITY BP_Items					"0xD5125503">
-	<!ENTITY bp_FactionCalculator		"0xD5125506">
+	<!ENTITY bp_FactionCalculator		"0xD5125504">
+	<!ENTITY st_bpJumperUnv				"0xD5125505">
+	<!ENTITY st_bpJumperSys				"0xD5125506">
 	
 	<!ENTITY bp_itPlasmidGunner			"0xD5125601">
 	<!ENTITY bp_itPlasmidGunnerHeavy	"0xD5125602">
+	<!ENTITY bp_itDefenderLight			"0xD5125603">
+	<!ENTITY bp_itCyclopsLight			"0xD5125607">
+	<!ENTITY bp_itPennaeLight			"0xD5125611">
 	
+	<!ENTITY bp_itPulseRifle			"0xD5125650">
 	<!ENTITY bp_itMonoFilamentBlade		"0xD5125651">
+	<!ENTITY bp_itShieldEmitter			"0xD5125652">
+	<!ENTITY bp_itExoSuit				"0xD5125653">
+
+	<!ENTITY rs_bpEquipIcons			"0xD5125691">
+	<!ENTITY rs_bpBobbyBots				"0xD5125692">
+	<!ENTITY rs_bpPlasmidGunner			"0xD5125693">
 ]>
 
 <TranscendenceExtension UNID="&BP_Items;" version="1.0">
-
+<globals>
+	;; this func gives us some items for testing
+	(setq battleOn (lambda Nil
+		(block Nil
+			(objAddItem gPlayerShip (itmCreate &bp_itPlasmidGunner; 4))
+			(objAddItem gPlayerShip (itmCreate &bp_itPlasmidGunnerHeavy; 2))
+			(objAddItem gPlayerShip (itmCreate &bp_itDefenderLight; 3))
+			(objAddItem gPlayerShip (itmCreate &bp_itCyclopsLight; 2))
+			(objAddItem gPlayerShip (itmCreate &bp_itPennaeLight; 1))
+			(objAddItem gPlayerShip (itmCreate &bp_itPulseRifle; 1))
+			(objAddItem gPlayerShip (itmCreate &bp_itMonoFilamentBlade; 1))
+			(objAddItem gPlayerShip (itmCreate &bp_itShieldEmitter; 1))
+			(objAddItem gPlayerShip (itmCreate &bp_itExoSuit; 1))
+		)
+	))
+</Globals>
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;					Troop Items
 ;;;	The gears and cogs that battle is made of!
@@ -24,27 +51,32 @@
         level=			"1"
         value=			"350"
         mass=			"50"
-        frequency=		"common"
+        frequency=		"notRandom"
         numberAppearing="1d5+5"
-        modifiers=		"TroopUnit; MinorItem;"
+        modifiers=		"TroopUnit; MinorItem; notForSale"
 
         description=	"Plasmid Gunners are the most common simple boarding bot."
         sortname=		"troop, plasmid gunner,"
         >
 
-		<Image imageID="&rsItems1;" imageX="192" imageY="480" imageWidth="96" imageHeight="96"/>
+		<Image imageID="&rs_bpPlasmidGunner;" imageX="0" imageY="0" imageWidth="96" imageHeight="96"/>
 
         <StaticData>
-			<Strength>5</Strength>
-			<Defense>5</Defense>
-			<Health>8</Health>
-			<C3I>3</C3I>
-			<Stealth>2</Stealth>
-			<Psionics>1</Psionics>
-			<Hacker>5</Hacker>
-			<Healer>1</Healer>
-			<Demolitions>3</Demolitions>
-			<Commando>2</Commando>
+			<RngPwr>15</RngPwr>
+			<RngSpd>2</RngSpd>
+			<RngAcu>50</RngAcu>
+			<MelPwr>3</MelPwr>
+			<MelSpd>1</MelSpd>
+			<MelAcu>90</MelAcu>
+			<DefShd>30</DefShd>
+			<DefArm>10</DefArm>
+			<DefHP>5</DefHP>
+			<Hacker>10</Hacker>
+			<Stealth>0</Stealth>
+			<Psionic>0</Psionic>
+			<Demolition>0</Demolition>
+			<Repair>0</Repair>
+			<Recon>2</Recon>
 			<Desc>"Plasmid gunners are the most common and simple combat robots available."</Desc>
         </StaticData>
     </ItemType>
@@ -56,35 +88,188 @@
         level=			"2"
         value=			"650"
         mass=			"75"
-        frequency=		"common"
+        frequency=		"notRandom"
         numberAppearing="1d3+3"
-        modifiers=		"TroopUnit; MinorItem;"
+        modifiers=		"TroopUnit; MinorItem; notForSale"
 
         description=	"Heavy plasmid gunners have improved AI and better armaments then the light gunners."
         sortname=		"troop, plasmid gunner, heavy"
         >
 
-		<Image imageID="&rsItems1;" imageX="192" imageY="480" imageWidth="96" imageHeight="96"/>
+		<Image imageID="&rs_bpPlasmidGunner;" imageX="0" imageY="0" imageWidth="96" imageHeight="96"/>
 
         <StaticData>
-			<Strength>10</Strength>
-			<Defense>12</Defense>
-			<Health>16</Health>
-			<C3I>5</C3I>
-			<Stealth>1</Stealth>
-			<Psionics>1</Psionics>
-			<Hacker>8</Hacker>
-			<Healer>1</Healer>
-			<Demolitions>5</Demolitions>
-			<Commando>4</Commando>
+			<RngPwr>30</RngPwr>
+			<RngSpd>6</RngSpd>
+			<RngAcu>60</RngAcu>
+			<MelPwr>3</MelPwr>
+			<MelSpd>1</MelSpd>
+			<MelAcu>90</MelAcu>
+			<DefShd>50</DefShd>
+			<DefArm>15</DefArm>
+			<DefHP>15</DefHP>
+			<Hacker>20</Hacker>
+			<Stealth>4</Stealth>
+			<Psionic>0</Psionic>
+			<Demolition>0</Demolition>
+			<Repair>4</Repair>
+			<Recon>8</Recon>
 			<Desc>"Heavy plasmid gunners have improved AI and better armaments then the light gunners."</Desc>
         </StaticData>
     </ItemType>
 	
+<!--- Thanks to Bobby for these awesome robot images!!!	--->
+<!---	Defender, Light	--->
+    <ItemType UNID="&bp_itDefenderLight;"
+        name=			"Defender MKI"
+        level=			"3"
+        value=			"85"
+        mass=			"90"
+        frequency=		"common"
+        numberAppearing="1d5+5"
+        modifiers=		"TroopUnit; MinorItem"
+
+        description=	"Ryad armaments Defender series personal defense bots are used throughout the commonwealth as cheap bodyguards."
+        sortname=		"troop, defender 1,"
+        >
+
+		<Image imageID="&rs_bpBobbyBots;" imageX="0" imageY="0" imageWidth="96" imageHeight="96"/>
+
+        <StaticData>
+			<RngPwr>8</RngPwr>
+			<RngSpd>6</RngSpd>
+			<RngAcu>60</RngAcu>
+			<MelPwr>9</MelPwr>
+			<MelSpd>6</MelSpd>
+			<MelAcu>75</MelAcu>
+			<DefShd>10</DefShd>
+			<DefArm>10</DefArm>
+			<DefHP>25</DefHP>
+			<Hacker>0</Hacker>
+			<Stealth>3</Stealth>
+			<Psionic>0</Psionic>
+			<Demolition>0</Demolition>
+			<Repair>0</Repair>
+			<Recon>2</Recon>
+			<Desc>"Not exceptionally smart or powerful, the cyclops gets the job done on a budget."</Desc>
+        </StaticData>
+    </ItemType>
+
+<!---	Defender, Medium	--->
+<!---	Defender, Heavy	--->
+<!---	Defender, Advanced	--->
+
+<!---	The cyclops, light	--->
+
+    <ItemType UNID="&bp_itCyclopsLight;"
+        name=			"Cyclops-light battle bot"
+        level=			"3"
+        value=			"250"
+        mass=			"150"
+        frequency=		"uncommon"
+        numberAppearing="1d5+2"
+        modifiers=		"TroopUnit; MinorItem"
+
+        description=	"Ryad armaments 'Cyclops' line of battle bots have shown their mettle in countless battles since the Syrtis War."
+        sortname=		"troop, cyclops 1,"
+        >
+
+		<Image imageID="&rs_bpBobbyBots;" imageX="0" imageY="96" imageWidth="96" imageHeight="96"/>
+
+        <StaticData>
+			<RngPwr>30</RngPwr>
+			<RngSpd>2</RngSpd>
+			<RngAcu>50</RngAcu>
+			<MelPwr>200</MelPwr>
+			<MelSpd>1</MelSpd>
+			<MelAcu>30</MelAcu>
+			<DefShd>30</DefShd>
+			<DefArm>30</DefArm>
+			<DefHP>30</DefHP>
+			<Hacker>0</Hacker>
+			<Stealth>0</Stealth>
+			<Psionic>0</Psionic>
+			<Demolition>0</Demolition>
+			<Repair>0</Repair>
+			<Recon>2</Recon>
+			<Desc>"Not exceptionally smart or powerful, the cyclops gets the job done on a budget."</Desc>
+        </StaticData>
+    </ItemType>
+	
+<!---	The cyclops, medium	--->
+<!---	The cyclops, heavy	--->
+<!---	The cyclops, advanced	--->
+
+<!---	The cyclops, light	--->
+
+    <ItemType UNID="&bp_itPennaeLight;"
+        name=			"Light pennae striker"
+        level=			"4"
+        value=			"500"
+        mass=			"45"
+        frequency=		"uncommon"
+        numberAppearing="1d3+1"
+        modifiers=		"TroopUnit; MinorItem; illegal"
+
+        description=	"The pennae line of strike bots by hiboto unlimited are well constructed and popular among private militia groups."
+        sortname=		"troop, pennae 1,"
+        >
+
+		<Image imageID="&rs_bpBobbyBots;" imageX="0" imageY="192" imageWidth="96" imageHeight="96"/>
+
+        <StaticData>
+			<RngPwr>8</RngPwr>
+			<RngSpd>6</RngSpd>
+			<RngAcu>90</RngAcu>
+			<MelPwr>8</MelPwr>
+			<MelSpd>6</MelSpd>
+			<MelAcu>90</MelAcu>
+			<DefShd>10</DefShd>
+			<DefArm>10</DefArm>
+			<DefHP>300</DefHP>
+			<Hacker>0</Hacker>
+			<Stealth>2</Stealth>
+			<Psionic>0</Psionic>
+			<Demolition>0</Demolition>
+			<Repair>0</Repair>
+			<Recon>20</Recon>
+			<Desc>"The small size and powerful micro jets make the pennae stikers nearly impossible to hit."</Desc>
+        </StaticData>
+    </ItemType>
+	
+<!---	The pennae, medium	--->
+<!---	The pennae, heavy	--->
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;				Commander Items
 ;;;	These items allow more specialization of the character
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+<!---	Pulse rifle	--->
+
+    <ItemType UNID="&bp_itPulseRifle;"
+        name=			"Pulse rifle"
+        level=			"3"
+        value=			"500"
+        mass=			"9"
+        frequency=		"common"
+        numberAppearing="1"
+        modifiers=		"Commander; MajorItem; RangedWeapon"
+
+        description=	"The pulse rifle is a standard issue longarm for many armies, militias, and anyone else that holds a grudge."
+        sortname=		"commander, pulserifle"
+        >
+
+		<Image imageID="&rs_bpEquipIcons;" imageX="0" imageY="0" imageWidth="96" imageHeight="96"/>
+
+        <StaticData>
+			<RngPwr>30</RngPwr>
+			<RngSpd>3</RngSpd>
+			<RngAcu>5</RngAcu>
+        </StaticData>
+    </ItemType>
+
+<!---	Mono Filament blade	--->
 
     <ItemType UNID="&bp_itMonoFilamentBlade;"
         name=			"mono-filament blade"
@@ -93,29 +278,64 @@
         mass=			"5"
         frequency=		"rare"
         numberAppearing="1"
-        modifiers=		"Commander; MajorItem;"
+        modifiers=		"Commander; MajorItem; MeleeWeapon"
 
         description=	"This blade is constructed using nano tech to align individual atoms and ensure this blade never dulls."
         sortname=		"commander, mono-filament blade,"
         >
 
-		<Image imageID="&rsItems1;" imageX="192" imageY="480" imageWidth="96" imageHeight="96"/>
+		<Image imageID="&rs_bpEquipIcons;" imageX="0" imageY="96" imageWidth="96" imageHeight="96"/>
 
         <StaticData>
-			<Strength>10</Strength>
-			<Defense>0</Defense>
-			<Health>0</Health>
-			<C3I>0</C3I>
-			<Stealth>0</Stealth>
-			<Psionics>0</Psionics>
-			<Hacker>0</Hacker>
-			<Healer>0</Healer>
-			<Demolitions>0</Demolitions>
-			<Commando>0</Commando>
-			<Commander>0</Commander>
+			<MelPwr>20</MelPwr>
+			<MelSpd>1</MelSpd>
+			<MelAcu>10</MelAcu>
         </StaticData>
     </ItemType>
-	
+
+<!---	Personal shield emitter	--->
+
+    <ItemType UNID="&bp_itShieldEmitter;"
+        name=			"Personal shield emitter"
+        level=			"5"
+        value=			"11500"
+        mass=			"30"
+        frequency=		"rare"
+        numberAppearing="1"
+        modifiers=		"Commander; MajorItem; Shield"
+
+        description=	"The advances of energy storage and miniturization finally made it possible to wrap a human in an envelope of energy."
+        sortname=		"commander, shield emitter"
+        >
+
+		<Image imageID="&rs_bpEquipIcons;" imageX="0" imageY="192" imageWidth="96" imageHeight="96"/>
+
+        <StaticData>
+			<DefShd>50</DefShd>
+        </StaticData>
+    </ItemType>
+
+<!---	Rasiermesser exo-suit	--->
+
+    <ItemType UNID="&bp_itExoSuit;"
+        name=			"Rasiermesser exo suit"
+        level=			"4"
+        value=			"8750"
+        mass=			"100"
+        frequency=		"rare"
+        numberAppearing="1"
+        modifiers=		"Commander; MajorItem; Rasiermesser, Specialty, Armor"
+
+        description=	"Rasiermesser began marketing this suit of exo armor after it's contract with the CW militia expired."
+        sortname=		"commander, exoSuit"
+        >
+
+		<Image imageID="&rs_bpEquipIcons;" imageX="0" imageY="288" imageWidth="96" imageHeight="96"/>
+
+        <StaticData>
+			<DefArm>100</DefArm>
+        </StaticData>
+    </ItemType>
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;				Master Sovereign Data Holder
@@ -127,22 +347,38 @@
 			virtual=			"true"
 			>
         <StaticData>
-			;; this data is stored as the UNID of the sovereign for easy 
-			;; compatibility with the logic funcs, although it is hard to read....
+			;; missing sovs (current sov)
+			;;---------------------------
+			;; ranx (des Order)
+			;; Ventari (des Order)
+			;; Luminous (des Order)
+			;; Xenophobes (des chaos)
+			;; Pteravores (des chaos)
+			;; Kobol (des Chaos) sometimes??
+			;; Salvager (ind Trader)
+			;; Teraton	(ind Trader) but the ringers have their own?
+			;; Domina (CW) there is an svDomina but its not used
+			;; Tinkers (Ind)
+			;; independent (cons Chaos) and independent trader (neutral) display independent merchant
 			<independent>
 				(list
 					('name			"Independent")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 				)
 			</independent>
 			
@@ -150,17 +386,22 @@
 				;; commonwealth
 				(list
 					('name			"Commonwealth")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</Commonwealth>
 			
@@ -168,17 +409,22 @@
 				;; independent merchant
 				(list
 					('name			"Independent merchant")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</IndMerch>
 			
@@ -186,17 +432,22 @@
 				;; independent merchant
 				(list
 					('name			"Independent merchant")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</IndMerch>
 			
@@ -204,17 +455,22 @@
 				;; charon pirates
 				(list
 					('name			"Charon Pirates")
-					('Strength		2	5)
-					('Defense		1	4)
-					('HP			1	3)
-					('C3I			0	0)
-					('Stealth		0	0)
-					('Psionic		0	0)
-					('Hacker		0	0)
-					('Healer		0	0)
-					('Demolition	0	0)
-					('Commando		0	0)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</Charon>
 			
@@ -222,17 +478,22 @@
 				;; outlaws
 				(list
 					('name			"Outlaws")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</Outlaws>
 			
@@ -240,17 +501,22 @@
 				;; ares sect
 				(list
 					('name			"Ares")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</Ares1>
 			
@@ -258,17 +524,22 @@
 				;; anarchists
 				(list
 					('name			"Anarchists")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</anarachists>
 			
@@ -276,17 +547,22 @@
 				;; settlers
 				(list
 					('name			"Settlers")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</settlers>
 			
@@ -294,17 +570,22 @@
 				;; cult
 				(list
 					('name			"Cult")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</cult>
 			
@@ -312,17 +593,22 @@
 				;; rogue fleet
 				(list
 					('name			"Rogue fleet")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</rogue>
 			
@@ -330,17 +616,22 @@
 				;; sung slavers
 				(list
 					('name			"Sung slavers")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</sung>
 			
@@ -348,17 +639,22 @@
 				;; slaves of sung
 				(list
 					('name			"Slaves")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</slaves>
 			
@@ -366,17 +662,22 @@
 				;; (destructive chaos)
 				(list
 					('name			"Destructive chaos")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</desChaos>
 			
@@ -384,17 +685,22 @@
 				;; auton
 				(list
 					('name			"Auton")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</auton>
 			
@@ -402,17 +708,22 @@
 				;; (destructive order)
 				(list
 					('name			"Destructive Order")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</desOrder>
 			
@@ -420,17 +731,22 @@
 				;; corporate hierarchy
 				(list
 					('name			"Corporate")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</corporate>
 			
@@ -438,17 +754,22 @@
 				;; black market
 				(list
 					('name			"Black Market")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</BM>
 			
@@ -456,17 +777,22 @@
 				;; ferian miners
 				(list
 					('name			"Ferian miners")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</ferian>
 			
@@ -474,17 +800,22 @@
 				;; ringers
 				(list
 					('name			"ringers")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</ringers>
 			
@@ -492,17 +823,22 @@
 				;; gladiator
 				(list
 					('name			"Gladiator")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</gladiator>
 			
@@ -510,17 +846,22 @@
 				;; csc antarctica
 				(list
 					('name			"CSC antarctica")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</antarctica>
 			
@@ -528,17 +869,22 @@
 				;; commonwealth fleet
 				(list
 					('name			"Commonwealth fleet")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</CWFleet>
 			
@@ -546,17 +892,22 @@
 				;; iocrym
 				(list
 					('name			"Iocrym")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</iocrym>
 			
@@ -564,17 +915,22 @@
 				;; ares sect
 				(list
 					('name			"Ares")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</Ares2>
 			
@@ -582,17 +938,22 @@
 				;; sentinel AI
 				(list
 					('name			"Iocrym sentinel AI")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</AI>
 			
@@ -600,17 +961,22 @@
 				;; domina
 				(list
 					('name			"Domina")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		10	20)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</domina>
 			
@@ -618,34 +984,44 @@
 				;; heliotropes
 				(list
 					('name			"Heliotrope")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</heliotropes>
 			
 			<Centauri>
 				(list
 					('name 			"Centauri warlords")
-					('Strength		2	5)
-					('Defense		3	5)
-					('HP			2	5)
-					('C3I			1	1)
-					('Stealth		1	1)
-					('Psionic		1	1)
-					('Hacker		1	1)
-					('Healer		1	1)
-					('Demolition	1	1)
-					('Commando		1	1)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		5)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		3)
+					('DefHP			5)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 				)
 			</Centauri>
 			
@@ -653,17 +1029,22 @@
 				;; kobol warlords
 				(list
 					('name			"Kobol warlords")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</kobol>
 			
@@ -671,17 +1052,22 @@
 				;; luminous drone
 				(list
 					('name			"Luminous drone")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</luminous>
 			
@@ -689,17 +1075,22 @@
 				;; huari empire
 				(list
 					('name			"Huari")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</huari>
 			
@@ -707,17 +1098,22 @@
 				;; dwarg raiders
 				(list
 					('name			"Dwarg")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</dwarg>
 			
@@ -725,17 +1121,22 @@
 				;; zoanthropes
 				(list
 					('name			"Zoanthropes")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</zoanthropes>
 			
@@ -743,17 +1144,22 @@
 				;; marauders
 				(list
 					('name			"Marauders")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</marauders>
 			
@@ -761,17 +1167,22 @@
 				;; himal separatists
 				(list
 					('name			"Himal Separatist")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</himal>
 			
@@ -779,17 +1190,22 @@
 				;; urak warlords
 				(list
 					('name			"Urak warlord")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</urak>
 			
@@ -797,17 +1213,22 @@
 				;; gaian terraformers
 				(list
 					('name			"Gaian")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</gaian>
 			
@@ -815,20 +1236,56 @@
 				;; for unknown sovereigns (modded)
 				(list
 					('name			"Unknown")
-					('Strength		10	20)
-					('Defense		10	20)
-					('HP			10	20)
-					('C3I			10	20)
-					('Stealth		10	20)
-					('Psionic		10	20)
-					('Hacker		10	20)
-					('Healer		10	20)
-					('Demolition	10	20)
-					('Commando		10	20)
-					('Troops		1	2)
+					('troopName		"soldier")
+					('RngPwr		10)
+					('RngSpd		1)
+					('RngAcu		40)
+					('MelPwr		15)
+					('MelSpd		1)
+					('MelAcu		60)
+					('DefShd		0)
+					('DefArm		5)
+					('DefHP			3)
+					('Hacker		0)
+					('Stealth		0)
+					('Psionic		0)
+					('Demolition	0)
+					('Repair		0)
+					('Recon			0)
 					)
 			</Misc>
 		</StaticData>
 	</ItemType>
+	<StationType UNID="&st_bpJumperUnv;" backgroundObject=	"true">
+		<Image imageID="&rsStar1;" imageX="0" imageY="0" imageWidth="1" imageHeight="1"/>
+		<Events>
+			<OnGlobalSystemCreated>
+				(sysCreateStation &st_bpJumperSys; (sysVectorPolarOffset Nil 0 10000))
+			</OnGlobalSystemCreated>
+		</Events>
+	</StationType>
+	  
+	<StationType UNID="&st_bpJumperSys;" backgroundObject=	"true">
+		<Image imageID="&rsStar1;" imageX="0" imageY="0" imageWidth="1" imageHeight="1"/>
+		<Events>
+			<OnCreate>(sysAddObjTimerEvent 15 gSource 'jump)</OnCreate>
+			<jump>
+				(block Nil
+					;; set up our default data
+					(bp_InitializePlayerData)
+					;; for testing we add some free items
+					(battleOn)
+					)
+			</jump>
+		</Events>
+	</StationType>
+	
+<!---		Image resources		--->
+;; Special thanks to digdug for sending me the following images!!
+	<Image UNID="&rs_bpEquipIcons;"  bitmap="resources\equipmentIcons.jpg" bitMask="resources\equipmentIconsMask.bmp"/>
+	<Image UNID="&rs_bpPlasmidGunner;"  bitmap="resources\bp_PlasmidGunner.bmp"   backColor="0x00000000"/>
+;; and to bobby for making these awesome pics!
+	<Image UNID="&rs_bpBobbyBots;"  bitmap="resources\bobbyBots.jpg"   bitMask="resources\bobbyBotsMask.bmp"/>
+
 	
 </TranscendenceExtension>

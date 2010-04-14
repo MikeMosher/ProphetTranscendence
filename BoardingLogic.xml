@@ -3,9 +3,6 @@
 [
 	<!ENTITY BP_Logic					"0xD5125502">
 	<!ENTITY bp_FactionCalculator		"0xD5125506">
-
-	<!ENTITY bp_itPlasmidGunner			"0xD5125601">
-	<!ENTITY bp_itMonoFilamentBlade		"0xD5125651">
 ]>
 
 <TranscendenceExtension UNID="&BP_Logic;" version="1.0">
@@ -22,7 +19,7 @@
 	(setq bp_Debug True)
 	;; this is a convenient way to force all debug calls from
 	;; log to screen
-	(setq bp_DebugToScreen Nil)
+	(setq bp_DebugToScreen True)
 	;; DoDebug will print debug information if dsf_Debug
 	;; is set. It takes a string which will be output, and
 	;; if screen is True, it will be sent to the screen.
@@ -35,15 +32,9 @@
 			)
 		)
 	))
-	(setq battleOn (lambda Nil
-		(block Nil
-			(objAddItem gPlayerShip (itmCreate &bp_itPlasmidGunner; 1) 10)
-			(objAddItem gPlayerShip (itmCreate &bp_itMonoFilamentBlade; 1))
-		)
-	))
-
+	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;		Manipulating Player Data
+;;;		Player Data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 	;;;	Player data is kept on the playership because it will change as
@@ -52,42 +43,46 @@
 
 	;; This function sets everything up and should only be run once
 	(setq bp_InitializePlayerData (lambda Nil
-		(if (not (objGetData gPlayerShip "bpInitialized"))
-			(block Nil
-				(objSetData gPlayerShip "Strength"	10)
-				(objSetData gPlayerShip "Defense"	10)
-				(objSetData gPlayerShip "HP"		10)
-				(objSetData gPlayerShip "C3I"		10)
-				(objSetData gPlayerShip "Stealth"	10)
-				(objSetData gPlayerShip "Psionic"	10)
-				(objSetData gPlayerShip "Hacker"	10)
-				(objSetData gPlayerShip "Healer"	10)
-				(objSetData gPlayerShip "Demolition" 10)
-				(objSetData gPlayerShip "Commando"	10)
-				(objSetData gPlayerShip "Commander"	10)
+		(block Nil
+			;; common combat stats
+			(dsf_SetData 'plyRngPwr		0)
+			(dsf_SetData 'plyRngSpd		1)
+			(dsf_SetData 'plyRngAcu		50)
+			(dsf_SetData 'plyMelPwr		10)
+			(dsf_SetData 'plyMelSpd		1)
+			(dsf_SetData 'plyMelAcu		70)
+			(dsf_SetData 'plyDefShd		0)
+			(dsf_SetData 'plyDefArm		0)
+			(dsf_SetData 'plyDefHP		50)
 
-				(objSetData gPlayerShip "Tactics" 	1)
-				(objSetData gPlayerShip "bpCommXP" 	0)
-				(objSetData gPlayerShip 'bpCommLevel 1)
-				(objSetData gPlayerShip 'bpCommPoints 5)
-				
-				(objSetData gPlayerShip "bpVictories" 0)
-				(objSetData gPlayerShip "bpFailures" 0)
-				
-				(objSetData gPlayership "plyCommitted" Nil)
-				
-				;; mark that we've been run
-				(objSetData gPlayerShip "bpInitialized" True)
-			)
+			;; skills
+			(dsf_SetData 'plyHacker		10)
+			(dsf_SetData 'plyStealth	10)
+			(dsf_SetData 'plyPsionic	10)
+			(dsf_SetData 'plyDemolition 10)
+			(dsf_SetData 'plyRepair		10)
+			(dsf_SetData 'plyRecon		10)
+
+			;; player specific 
+			(dsf_SetData 'plyBpTac 		1)
+			(dsf_SetData 'plyBpCmr		10)
+			(dsf_SetData 'plyBpXP	 	0)
+			(dsf_SetData 'plyBpLVL 		1)
+			(dsf_SetData 'plyBpPts 		5)
+			(dsf_SetData 'plybpVic		0)
+			(dsf_SetData 'plyBpFal		0)
+
+			;; by default, player does not enter battle
+			(dsf_SetData 'plyCommitted Nil)
 		)
 	))
-
+	
 	;; If the player has enough xp to gain a level
 	;; return the new level, else returns nil
 	(setq bp_ComputeCommanderLevel (lambda Nil
 		(block (xp oldLvl newLvl)
-			(setq xp (objGetData gPlayerShip 'bpCommXP))
-			(setq oldLvl (objGetData gPlayerShip 'bpCommLevel))
+			(setq xp (dsf_GetData 'plyBpXP))
+			(setq oldLvl (dsf_GetData 'plyBpLVL))
 			(switch
 				(leq xp 100)
 					(setq newLvl 2)
@@ -119,8 +114,8 @@
 	(setq bp_ComputeXPNeeded (lambda Nil
 		(block (xp lvl xpNeed)
 			(setq xpNeed 0)
-			(setq xp (objGetData gPlayerShip 'bpCommXP))
-			(setq lvl (objGetData gPlayerShip 'bpCommLevel))
+			(setq xp (dsf_GetData 'plyBpXP))
+			(setq lvl (dsf_GetData 'plyBpLVL))
 			(switch
 				(eq lvl 1)
 					(setq xpNeed (subtract 100 xp))
@@ -150,6 +145,8 @@
 ;;; Enemy data is kept in static data because it remains the same 
 ;;; throughout the game and is modified dynamically to suit our needs
 
+	;; this is our helper func to pull stats out of static data
+	;; the 'sov' arg must be filtered with bp_sovHack to work properly
 	(setq bp_GetEnemyData (lambda (sov stat)
 		(block (sovlist data Found)
 			(setq sovlist (itmGetStaticData (itmCreate &bp_FactionCalculator; 0) sov))
@@ -157,10 +154,7 @@
 			(enumwhile sovlist (not Found) thisEntry (block Nil
 				(if (eq (item thisEntry 0) stat)
 					(block nil
-						(if (eq stat 'name)
-							(setq data (item thisEntry 1))
-							(setq data (random (item thisEntry 1) (item thisEntry 2)))
-							)
+						(setq data (item thisEntry 1))
 						(setq Found True)
 					)
 				)
@@ -170,51 +164,95 @@
 	))
 	
 	;; Set up an enemy force to fight with
+	;; This is run after we've determined that we will have a fight
 	(setq bp_InitializeEnemy (lambda Nil
 		;; check if we've already run
-		(if (not (objGetData gSource "initEnemyDone"))
-			(block (sov lvl imageData)
+		(if (not (objGetData gSource "bp_initEnemyDone"))
+			(block (sov lvl imageData ship enmTroopCount)
+				;; we must hack the sov to get a nice string we can work with
 				(setq sov (sovHack (objGetSovereign gSource)))
 				(setq lvl (sysGetLevel))
 				;; we use the image of the station to determine a rough
-				;; estimate for how much resistance is present
-				(setq imageData (item (objGetImageDesc gSource) 3))
+				;; estimate how much resistance is present based on the image size
+				;; we use rollDice to generate a nice curve for troops generated rather than a pure random num
+				(setq imageData (max (item (objGetImageDesc gSource) 3) (item (objGetImageDesc gSource) 4)))
+				;; check if this used to be a ship (in which case, less troops)
+				(setq ship (if (strFind 'wreck (objGetname gSource)) True Nil))
 				(switch
-					(leq imageData 40)
-						(setq imageData '(1 2))
-					(leq imageData 75)
-						(setq imageData '(1 3))
-					(leq imageData 99)
-						(setq imageData '(2 5))
-					(leq imageData 115)
-						(setq imageData '(5 10))
-					(leq imageData 130)
-						(setq imageData '(10 25))
-					(leq imageData 250)
-						(setq imageData '(20 50))
-					(geq imageData 251)
-						(setq imageData '(50 100))
+					;; we found a tiny/small ship, only 1 troop
+					(and (leq imageData 64) ship)
+						(setq enmTroopCount 1)
+					;; we found a tiny station, 3-7 troops
+					(leq imageData 64)
+						(setq enmTroopCount (rollDice 2 3 1))
+
+					;; we found a med ship, 3-7 troops
+					(and (leq imageData 96) ship)
+						(setq enmTroopCount (rollDice 2 3 1))
+					;; we found a small station, 6-18 troops
+					(leq imageData 96)
+						(setq enmTroopCount (rollDice 3 5 3))
+						
+					;; we found a small cap ship, 15-40 troops
+					(and (leq imageData 128) ship)
+						(setq enmTroopCount (rollDice 5 6 10))
+					;; we found a med station, 26-80 troops
+					(leq imageData 128)
+						(setq enmTroopCount (rollDice 6 10 20))
+
+					;; we found a cap ship, 34-90 troops
+					(and (leq imageData 192) ship)
+						(setq enmTroopCount (rollDice 4 15 30))
+					;; we found a med/lrg station, 55-175 troops
+					(leq imageData 192)
+						(setq enmTroopCount (rollDice 5 25 50))
+
+					;; we found a massive cap ship, 66-240 troops
+					(and (gr imageData 192) ship)
+						(setq enmTroopCount (rollDice 6 30 60))
+					;; we found a massive station, 77-420 troops
+					(gr imageData 192)
+						(setq enmTroopCount (rollDice 7 50 70))
 					)
-				(objSetData gSource "Name" (bp_GetEnemyData sov 'name))
-				(objSetData gSource "strength" (bp_GetEnemyData sov 'Strength))
-				(objSetData gSource "defense" (bp_GetEnemyData sov 'Defense))
-				(objSetData gSource "hp" (bp_GetEnemyData sov 'HP))
-				(objSetData gSource "c3i" (bp_GetEnemyData sov 'C3I))
-				(objSetData gSource "stealth" (bp_GetEnemyData sov 'Stealth))
-				(objSetData gSource "psionic" (bp_GetEnemyData sov 'Psionic))
-				(objSetData gSource "hacker" (bp_GetEnemyData sov 'Hacker))
-				(objSetData gSource "healer" (bp_GetEnemyData sov 'Healer))
-				(objSetData gSource "demolition" (bp_GetEnemyData sov 'Demolition))
-				(objSetData gSource "commando" (bp_GetEnemyData sov 'Commando))
-				;; ships have fewer troops then stations so deal with them separately
-				(objSetData gSource "enemytroopCount" 
-					(if (objIsShip gSource)
-						(add (bp_GetEnemyData sov 'Troops) (random 0 (item imageData 0)))
-						(add (bp_GetEnemyData sov 'Troops) (random (item imageData 0) (item imageData 1)))
-						)
-					)
+					
+				;; still getting too many troops on a station so we set a max
+				;; limit of sysLevel X 10 for now until I can balance it properly
+				(setq enmTroopCount (min enmTroopcount (multiply lvl 10)))
+				;; now we save the troop count on our station
+				(objSetData gSource 'enmTroopCount enmTroopCount)
+
+				;; now we generate the enemy force
+				(objSetData gSource 'enmName (bp_GetEnemyData sov 'name))
+				(objSetData gSource 'enmRngPwr (bp_GetEnemyData sov 'rngPwr))
+				(objSetData gSource 'enmRngSpd (bp_GetEnemyData sov 'rngSpd))
+				(objSetData gSource 'enmRngAcu (bp_GetEnemyData sov 'rngAcu))
+				(objSetData gSource 'enmMelPwr (bp_GetEnemyData sov 'MelPwr))
+				(objSetData gSource 'enmMelSpd (bp_GetEnemyData sov 'MelSpd))
+				(objSetData gSource 'enmMelAcu (bp_GetEnemyData sov 'MelAcu))
+				(objSetData gSource 'enmDefShd (bp_GetEnemyData sov 'DefShd))
+				(objSetData gSource 'enmDefArm (bp_GetEnemyData sov 'DefArm))
+				(objSetData gSource 'enmDefHP (bp_GetEnemyData sov 'DefHP))
+				(objSetData gSource 'enmHacker (bp_GetEnemyData sov 'Hacker))
+				(objSetData gSource 'enmStealth (bp_GetEnemyData sov 'Stealth))
+				(objSetData gSource 'enmPsionic (bp_GetEnemyData sov 'Psionic))
+				(objSetData gSource 'enmDemolition (bp_GetEnemyData sov 'Demolitino))
+				(objSetData gSource 'enmRepair (bp_GetEnemyData sov 'Repair))
+				(objSetData gSource 'enmRecon (bp_GetEnemyData sov 'Recon))
+				
+				;; finally, determine some random event modifers
+				;; for now we set these as placeholders...
+				(dsf_SetScreenState 'evnRngPwr 100)
+				(dsf_SetScreenState 'evnRngSpd 100)
+				(dsf_SetScreenState 'evnRngAcu 100)
+				(dsf_SetScreenState 'evnMelPwr 100)
+				(dsf_SetScreenState 'evnMelSpd 100)
+				(dsf_SetScreenState 'evnMelAcu 100)
+				(dsf_SetScreenState 'evnDefShd 100)
+				(dsf_SetScreenState 'evnDefArm 100)
+				(dsf_SetScreenState 'evnDefHP 100)
+
 				;; mark that we've been run
-				(objSetData gSource "initEnemyDone" True)
+				(objSetData gSource "bp_initEnemyDone" True)
 				)
 			)
 	))
@@ -223,75 +261,57 @@
 ;;;		Core mechanics and logic
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
-	;; this function collects basic player data
+	;; this function determines whether or not we should have a fight
+	;; and enters the boarding DS framework
+	;; it should be run from the event handler when the player docks
 	(setq bp_InitializeBattle (lambda Nil
-		;; check if we've already run
-		(if (not (objGetData gSource "initPlayerDone"))
-			(block Nil
-				;; collect the data from the player and place it on the spaceObj
-				;; we do this because these values will fluctuate and we want to 
-				;; preserve the 'base' values stored on the playership
-				(objSetData gSource "plyStrength" (objGetData gPlayerShip "Strength"))
-				(objSetData gSource "plyDefense" (objGetData gPlayerShip "Defense"))
-				(objSetData gSource "plyHP" (objGetData gPlayerShip "HP"))
-				(objSetData gSource "plyC3I" (objGetData gPlayerShip "C3I"))
-				(objSetData gSource "plyStealth" (objGetData gPlayerShip "Stealth"))
-				(objSetData gSource "plyPsionic" (objGetData gPlayerShip "Psionic"))
-				(objSetData gSource "plyHacker" (objGetData gPlayerShip "Hacker"))
-				(objSetData gSource "plyHealer" (objGetData gPlayerShip "Healer"))
-				(objSetData gSource "plyDemolition" (objGetData gPlayerShip "Demolition"))
-				(objSetData gSource "plyCommando" (objGetData gPlayerShip "Commando"))
-				(objSetData gSource "plyCommander" (objGetData gPlayerShip "Commander"))
+		(block (sov excl)
+			;; check if the original sov of the station is hostile
+			(setq sov (if (eq (sovGetDisposition (objGetSovereign gSource) &svPlayer;) 'Enemy)
+				True
+				;; the sov isn't originally hostile, but will fight if the player is responsible
+				;(if (eq gPlayerShip aDestroyer) 
+				;	True
+				;	Nil
+				;	)
+				))
+			;; TODO: include some sort of exclusion list, perhaps of specific UNIDS that should
+			;; never have combat on them.  
+			(setq excl (list))
+			(if (find excl (staGetType gSource)) Nil True)
 
-				;; initialize some default tactic vars
-				(objSetData gSource "tacStrength" 0)
-				(objSetData gSource "tacDefense" 0)
-				(objSetData gSource "tacHP" 0)
-				(objSetData gSource "tacC3I" 0)
-				(objSetData gSource "tacStealth" 0)
-				(objSetData gSource "tacPsionic" 0)
-				(objSetData gSource "tacHacker" 0)
-				(objSetData gSource "tacHealer" 0)
-				(objSetData gSource "tacDemolition" 0)
-				(objSetData gSource "tacCommando" 0)
-				;; check the commander's status
-				(if (eq (objGetData gPlayership "plyCommitted") True)
-					(objSetData gSource "plycommitted" True)
-					(objSetData gSource "plyCommitted" Nil)
+			;; Final check of all our criteria
+			(if (and sov 
+					(or (not (objGetData gSource 'bp_Dead)) (isError (objGetData gSource 'bp_Dead)))
+					(or (not (objGetData gSource 'bp_CombatDone) (isError (objGetData gSource 'bp_CombatDone))))
+					(not (objCanAttack gSource))
+					(eq (find excl (staGetType gSource)) Nil)
+					(geq (objGetDestiny gSource) (multiply (sysGetLevel) 18))
 					)
-				;; mark that we've been run
-				(objSetData gSource "initPlayerDone" True)
-				)
-		)
-	))
-	
-	;; init function for the abandoned station dockscreens
-	;; it determines if there will be a battle or not
-	;; TODO: currently set up to make 100% of wrecks have battles for testing purposes
-	(setq intBoardingOnInit (lambda (prevPane)
-		(switch
-			(eq (objGetData gSource "BattleDone") True)
-				Nil ;; continue to normal screen
-			(and (leq (objGetDestiny gSource) (multiply (sysGetLevel) 36)))
+				;; we have a fight, redirect to our warning screen
 				(dsf_ShowDockScreen (bp_ScreenData 'Warning))
-			Nil ;; we don't qualify for battle, continue normally
 				)
+			)
 		))
 		
 	;; this function turns sov data into something I can use as a static data element
+	;; we have stats for all major sovs and a 'catch-all' for modded sovs or minor
+	;; factions that I don't feel like creating custom stats for :P
 	(setq sovHack (lambda (sov)
 		(switch
 			(eq sov 4097)
 				'Independent
 			(eq sov 4098)
 				'Commonwealth
-			(or (eq sov 4099) (eq sov 4100))
+			(eq sov 4099)
+				'IndMerch
+			(eq sov 4100)
 				'IndMerch
 			(eq sov 4101)
 				'Charon
 			(eq sov 4102)
 				'Outlaws
-			(eq sov 4103)
+			(eq sov 4103) ;; the main ares sov
 				'Ares1
 			(eq sov 4104)
 				'anarachists
@@ -320,6 +340,7 @@
 			(eq sov 4117)
 				'ringers
 			(or (eq sov 1314817) (eq sov -591790014) (eq sov -591790013) (eq sov -591790012))
+				;; the last 3 are from DSF's head-to-head spawn which is a dependency so we include them too
 				'gladiator
 			(eq sov 1708033)
 				'antarctica
@@ -327,11 +348,11 @@
 				'CWFleet
 			(eq sov 1839105)
 				'iocrym
-			(eq sov 1839106)
+			(eq sov 1839106)  ;; ares in heretic are neutral to the player
 				'Ares2
 			(eq sov 1839107)
 				'AI
-			(eq sov 2101249)
+			(eq sov 2101249) ;; this sov is never used in vanilla for some reason
 				'domina
 			(eq sov 134283333)
 				'heliotropes
@@ -355,159 +376,57 @@
 				'urak
 			(eq sov 134480195)
 				'gaian
-			'misc
+			'misc ;; this is our catch-all for modded sovs that aren't in the static data list
 			)
 		))
-)
-</Globals>
-
-<!---
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;							TACTICS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-The tactical choices will affect the troops in various ways, ranging from
-	increasing their attack power or defense to causing damage to the 
-	potential loot that is currently being fought for.
-the ability to use more advanced tactics will come from fighting more
-	battles, and perhaps even some new items.
-Choosing a tactic that is appropriate for the troops you are using is
-	critical for success.
-
-	Attack
-		Required Skill: 0
-		success determined by chance,
-		no modification of stats
-	Retreat
-		Required Skill: 0
-		Attempt to remove the engaged troops from battle
-		success determined by chance,
-		Reduce attatck power to 0 and attempt to undock
-	Take Cover
-		Required Skill: 5
-		success determined by chance, healer
-		Reduce attack by 25%, raise defense by 50%
-	Flank
-		Required Skill: 10
-		Maintain a superior line of fire
-		Success determined by C3I, stealth
-		Increase attack by 50%, reduce defense by 25%
-	Fighting Withdrawl
-		Required Skill: 12
-		Maintain line of fire while retreating
-		success determined by C3I,
-		reduce attack by 50% and attempt to undock
-	Feint
-		Required Skill: 15
-		High chance of caualties on one side or the other
-		success determined by C3I, Commando,
-		either raise attack by 100% or reduce defense by 50%
-	Attrition
-		Required Skill: 20
-		Maintain cover while slowly retreating
-		success determined by 
-		raise defense by 25% and attempt to undock
-	Rush
-		Required Skill: 25
-		High chance of casualties on one side or the other
-		success determined by chance
-		Increase attack by 100% AND reduce defense by 50%
-	Siege
-		Required Skill: 30
-		Use area attacks and long range weaponry
-		success determined by demolitions, hacker
-		Increase defense by 100%, reduce attack by 50%
-	Skirmish
-		Required Skill: 35
-		Divide and conquer, reduce to one-on-one
-		success determined by commando,
-		Increase attack by 100%, reduce defense by 50%		
-	Ambush
-		Required Skill: 40
-		Surround the enemy troops
-		success determined by hacker, psionics, commando
-		Increase attack by 100%
-	Spray and Pray
-		Required Skill: 45
-		Provide cover fire and tend wounds
-		success determined by healer, 
-		Increase Health back to max
-	Assassination
-		Required Skill: 50
-		Selectively destroy the command structure
-		success determined by stealth, hacker, psionics
-		Instant victory
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;							COMMANDER
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-The commander represents the player and a golden opportunity to take the
-	game down to the personal level.
-The extent to which the commander is used will vary from player to player.
-I feel it will be important to provide many options for customization and
-	enhancement to really provide an extra element to the gameplay.
-	
-Just like the troops, the commander will have the 3 basic stats:
-	Strength
-	Defense
-	Health
-However, unlike the troops, these stats will begin at a base value and can
-	be increased with personal equipment like firearms, armor etc.
-This will require many new items that will have limited use and a unique
-	method for bringing them into the game may be preferable to the 
-	standard looting.  Perhaps awarding them after battle would be better?
-These stats will also increase according to level (see below)
-	
-The commander will also possess the Advanced abilities and these will be 
-	included in the battle calculations whether the commander is in
-	direct combat or not.
-These abilities will increase by level (see below)
-
-The commander will also posses the SKILL attribute a Combat Level and Combat XP.
-	A successful battle will award 10XP, a failed battle will award 2XP
-	and the levels will be determined as follows:
-	
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;							ENEMIES
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-It is not in our best interest to create enemy troop items to fight against
-	but rather to simply simulate enemy troops.  The enemy will not use
-	any tactics, but it would be assumed that when a tactic fails (due to 
-	chance or lack of troop ability, commander skill etc.) the enemy was
-	responsible.
-It may be worthwhile to build a list of sovereigns and each sov have a list
-	of target numbers that would be used in the success/failure calculations
-	when the player chooses a tactic.
-This could provide differentiation between the Sovs/factions, so that the 
-	Luminous will be immune to a psionic attack but will be vulnerable to
-	hackers.
-This data could be stored on a single virtual item in the following format:
-	(itmGetStaticData &bp_FactionData; "Luminous") will return:
-		(list
-			;; base stats
-			3	; Strength
-			2	; Defense
-			1	; Health
-			;; adv. ability modifiers (%)
-			100	; C3I
-			150	; Stealth
-			0	; Psionics are useless
-			150	; Hacker
-			200	; Healer
-			100	; Demolitions
-			100	; Commando
-			;; number of enemy troops
-			1d3+2	; number of troops appearing
+		
+	;; this func is used to calculate ranged damage from all the committed troops
+	;; it takes no arguments and returns the damage total (as an integer)
+	(setq bp_RngDmgCalc (lambda Nil
+		(block (totRngDmg cnt)
+			(setq totRngDmg 0)
+			(setq cnt 0)
+			(enum (objGetItems gPlayerShip "*+TroopUnit") thisItem
+				(if (itmGetData thisItem 'committed)
+					(for i 1 (itmGetCount thisItem)
+						(block (rand pwr spd acu)
+							(setq rand (random 0 100))
+							(setq cnt (add cnt 1))
+							(setq pwr (divide (multiply (itmGetStaticData thisItem 'rngPwr) (dsf_GetScreenState 'tacRngPwr) (dsf_GetScreenState 'evnRngPwr)) 10000))
+							(setq spd (divide (multiply (itmGetStaticData thisItem 'rngSpd) (dsf_GetScreenState 'tacRngSpd) (dsf_GetScreenState 'evnRngSpd)) 10000))
+							(setq acu (divide (multiply (itmGetStaticData thisItem 'rngAcu) (dsf_GetScreenState 'tacRngAcu) (dsf_GetScreenState 'evnRngAcu)) 10000))
+							(if (leq rand acu)
+								(setq totRngDmg (add totRngDmg (divide (multiply pwr spd acu) 100)))
+								)
+							(dbgoutput (cat "Pwr: "pwr" | Spd: "spd" | Acu: "acu" | Troop#: "cnt" | Total Rng Dmg: "totRngDmg))
+							)
+						)
+					)
+				)
+			(dbgoutput "Total dmg of troops: "totRngDmg)
+			totRngDmg
 			)
-	where a value of 100 means that the player's ability is unmodified,
-	and a value >100 is more effective, <100 is less effective and 0
-	is an immunity.
-The base stats (ST, DF, and HP) are based on per/troop item values
-	and would be summed after calculating the number of troops present 
-	from the dice range value.
---->
+		))
+		
+	;; this func is used to calculate Melee damage from all the committed troops
+	;; it takes no arguments and returns the damage total (as an integer)
+	(setq bp_MelDmgCalc (lambda Nil
+		(block (totMelDmg)
+			(setq totMelDmg 0)
+			(enum (objGetItems gPlayerShip "*+TroopUnit") thisItem
+				(if (itmGetData thisItem 'committed)
+					(for i 1 (itmGetCount thisItem)
+						(setq totRngDmg (add totMelDmg (divide (multiply 
+							(divide (multiply (itmGetStaticData thisItem 'MelPwr) (dsf_GetScreenState 'tacMelPwr) (dsf_GetScreenState 'evnMelPwr)) 10000)
+							(divide (multiply (itmGetStaticData thisItem 'MelSpd) (dsf_GetScreenState 'tacMelSpd) (dsf_GetScreenState 'evnMelSpd)) 10000)
+							(divide (multiply (itmGetStaticData thisItem 'MelAcu) (dsf_GetScreenState 'tacMelAcu) (dsf_GetScreenState 'evnMelAcu)) 10000)
+							) 100)))
+						)
+					)
+				)
+			totMelDmg
+			)
+		))
+	)
+</Globals>
 </TranscendenceExtension>
